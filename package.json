@@ -1,0 +1,14 @@
+{
+  "name": "shahai-med-fraud-workspace",
+  "private": true,
+  "version": "0.1.0",
+  "scripts": {
+    "dev": "npm --prefix apps/web run dev",
+    "build": "npm --prefix apps/web run build",
+    "typecheck": "npm --prefix apps/web run typecheck",
+    "lint": "npm --prefix apps/web run lint",
+    "test:web": "npm --prefix apps/web run test",
+    "test:e2e": "npm --prefix apps/web run test:e2e"
+  }
+}
+

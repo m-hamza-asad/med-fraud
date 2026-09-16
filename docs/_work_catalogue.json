@@ -1,0 +1,5121 @@
+{
+  "source": "uae-medical-claims-fwa-developer-specification.md",
+  "source_version": "3.0",
+  "extraction_kind": "working_non_authoritative",
+  "extraction_notes": [
+    "Raw catalogue cells are preserved.",
+    "population, inputs, reason_code, and evidence_fields are null because the compact catalogue does not specify them per control.",
+    "configuration and exclusions cannot be reliably separated from the combined source column.",
+    "canonical disposition candidates are lexical heuristics only; every row remains resolution_required.",
+    "QUARTERLY has no canonical stage in section 2.3."
+  ],
+  "validation": {
+    "scenario_count": 39,
+    "control_count": 164,
+    "unique_rule_id_count": 164,
+    "problems": []
+  },
+  "controls": [
+    {
+      "scenario_id": "ENT-01",
+      "scenario_name": "Coverage, benefit and network eligibility",
+      "priority_raw": "P0",
+      "rule_id": "ENT-01-R01",
+      "rule_name": "Coverage inactive",
+      "type_expression": "H",
+      "types": [
+        "H"
+      ],
+      "stage_label": "PREPAY",
+      "canonical_stage": "PREPAY_SYNC",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "`service_time NOT BETWEEN coverage.valid_from AND coverage.valid_to`",
+      "requirements_raw": "Grace/newborn/emergency and retroactive-update policy",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Grace/newborn/emergency and retroactive-update policy",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Reject/pend; show coverage interval",
+        "canonical_candidates_heuristic": [
+          "REJECT",
+          "PREPAY_PEND"
+        ],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "ENT-01",
+      "scenario_name": "Coverage, benefit and network eligibility",
+      "priority_raw": "P0",
+      "rule_id": "ENT-01-R02",
+      "rule_name": "Benefit not covered",
+      "type_expression": "H",
+      "types": [
+        "H"
+      ],
+      "stage_label": "PREPAY",
+      "canonical_stage": "PREPAY_SYNC",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "`expected_benefit(activity_family, product).covered = false`",
+      "requirements_raw": "Mandatory benefits, approved exception, medical-tourism/self-pay route",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Mandatory benefits, approved exception, medical-tourism/self-pay route",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Reject with benefit version",
+        "canonical_candidates_heuristic": [
+          "REJECT"
+        ],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "ENT-01",
+      "scenario_name": "Coverage, benefit and network eligibility",
+      "priority_raw": "P0",
+      "rule_id": "ENT-01-R03",
+      "rule_name": "Benefit limit exceeded",
+      "type_expression": "H",
+      "types": [
+        "H"
+      ],
+      "stage_label": "PREPAY",
+      "canonical_stage": "PREPAY_SYNC",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "`paid_or_authorized_ytd + requested_payable > benefit_limit`",
+      "requirements_raw": "Reset period, family/member basis, reversals, pending authorizations",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Reset period, family/member basis, reversals, pending authorizations",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Reprice or pend excess only",
+        "canonical_candidates_heuristic": [
+          "REPRICE",
+          "PREPAY_PEND"
+        ],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "ENT-01",
+      "scenario_name": "Coverage, benefit and network eligibility",
+      "priority_raw": "P0",
+      "rule_id": "ENT-01-R04",
+      "rule_name": "Network/referral violation",
+      "type_expression": "H",
+      "types": [
+        "H"
+      ],
+      "stage_label": "PREPAY",
+      "canonical_stage": "PREPAY_SYNC",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Provider/route outside effective network or required referral missing",
+      "requirements_raw": "Emergency, access-gap and regulator exceptions",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Emergency, access-gap and regulator exceptions",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Reject/pend with failed route",
+        "canonical_candidates_heuristic": [
+          "REJECT",
+          "PREPAY_PEND"
+        ],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "ENT-02",
+      "scenario_name": "Member identity misuse, card sharing and post-mortem billing",
+      "priority_raw": "P0",
+      "rule_id": "ENT-02-R01",
+      "rule_name": "Authoritative identity conflict",
+      "type_expression": "H",
+      "types": [
+        "H"
+      ],
+      "stage_label": "INGEST",
+      "canonical_stage": "INGEST",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Protected national-ID token maps to different enrolled member or DOB/sex conflicts with authoritative record",
+      "requirements_raw": "Placeholder IDs, newborns, corrected identity; names alone prohibited",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Placeholder IDs, newborns, corrected identity; names alone prohibited",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Pend for identity resolution",
+        "canonical_candidates_heuristic": [
+          "PREPAY_PEND"
+        ],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "ENT-02",
+      "scenario_name": "Member identity misuse, card sharing and post-mortem billing",
+      "priority_raw": "P0",
+      "rule_id": "ENT-02-R02",
+      "rule_name": "Post-mortem service",
+      "type_expression": "H",
+      "types": [
+        "H"
+      ],
+      "stage_label": "PREPAY",
+      "canonical_stage": "PREPAY_SYNC",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "`service_start > confirmed_death_date + cfg.reporting_tolerance`",
+      "requirements_raw": "Death-source confidence; administrative claims after service permitted",
+      "parameters_explicit": [
+        "reporting_tolerance"
+      ],
+      "exclusions": {
+        "raw_combined_with_configuration": "Death-source confidence; administrative claims after service permitted",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Pend/reject with source confidence",
+        "canonical_candidates_heuristic": [
+          "REJECT",
+          "PREPAY_PEND"
+        ],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "ENT-02",
+      "scenario_name": "Member identity misuse, card sharing and post-mortem billing",
+      "priority_raw": "P0",
+      "rule_id": "ENT-02-R03",
+      "rule_name": "Member impossible presence",
+      "type_expression": "S",
+      "types": [
+        "S"
+      ],
+      "stage_label": "PREPAY_ASYNC",
+      "canonical_stage": "PREPAY_ASYNC",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Same member has overlapping encounters or travel speed above `cfg.max_speed`",
+      "requirements_raw": "Inpatient ancillary lines, telehealth, claim date without time",
+      "parameters_explicit": [
+        "max_speed"
+      ],
+      "exclusions": {
+        "raw_combined_with_configuration": "Inpatient ancillary lines, telehealth, claim date without time",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Member lead with encounter pairs",
+        "canonical_candidates_heuristic": [],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "ENT-02",
+      "scenario_name": "Member identity misuse, card sharing and post-mortem billing",
+      "priority_raw": "P0",
+      "rule_id": "ENT-02-R04",
+      "rule_name": "Card-sharing utilization pattern",
+      "type_expression": "S",
+      "types": [
+        "S"
+      ],
+      "stage_label": "DAILY",
+      "canonical_stage": "POSTPAY_DAILY",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Incompatible concurrent geography/provider clusters or abrupt demographic-inconsistent service pattern",
+      "requirements_raw": "Chronic/rare disease pathways; require minimum independent evidence",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Chronic/rare disease pathways; require minimum independent evidence",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "SIU lead, never auto-reject",
+        "canonical_candidates_heuristic": [
+          "REJECT",
+          "SIU_LEAD"
+        ],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "ENT-03",
+      "scenario_name": "Provider/facility licence, exclusion and privilege",
+      "priority_raw": "P0",
+      "rule_id": "ENT-03-R01",
+      "rule_name": "Inactive/expired licence",
+      "type_expression": "H",
+      "types": [
+        "H"
+      ],
+      "stage_label": "PREPAY",
+      "canonical_stage": "PREPAY_SYNC",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Rendering, ordering, dispensing or facility licence not active at service time",
+      "requirements_raw": "Role-specific licence requirement and approved grace",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Role-specific licence requirement and approved grace",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Reject/pend with licence period",
+        "canonical_candidates_heuristic": [
+          "REJECT",
+          "PREPAY_PEND"
+        ],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "ENT-03",
+      "scenario_name": "Provider/facility licence, exclusion and privilege",
+      "priority_raw": "P0",
+      "rule_id": "ENT-03-R02",
+      "rule_name": "Excluded/watch-listed entity",
+      "type_expression": "H",
+      "types": [
+        "H"
+      ],
+      "stage_label": "PREPAY",
+      "canonical_stage": "PREPAY_SYNC",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Effective match on regulator or approved internal exclusion list",
+      "requirements_raw": "Exact ID match required for reject; fuzzy match only pends",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Exact ID match required for reject; fuzzy match only pends",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Reject or SIU lead",
+        "canonical_candidates_heuristic": [
+          "REJECT",
+          "SIU_LEAD"
+        ],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "ENT-03",
+      "scenario_name": "Provider/facility licence, exclusion and privilege",
+      "priority_raw": "P0",
+      "rule_id": "ENT-03-R03",
+      "rule_name": "Hard privilege violation",
+      "type_expression": "H",
+      "types": [
+        "H"
+      ],
+      "stage_label": "PREPAY",
+      "canonical_stage": "PREPAY_SYNC",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Activity outside regulator/facility privilege explicitly marked prohibited",
+      "requirements_raw": "Effective privilege source and exception",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Effective privilege source and exception",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Reject/pend",
+        "canonical_candidates_heuristic": [
+          "REJECT",
+          "PREPAY_PEND"
+        ],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "ENT-03",
+      "scenario_name": "Provider/facility licence, exclusion and privilege",
+      "priority_raw": "P0",
+      "rule_id": "ENT-03-R04",
+      "rule_name": "Soft specialty mismatch",
+      "type_expression": "E",
+      "types": [
+        "E"
+      ],
+      "stage_label": "PREPAY_ASYNC",
+      "canonical_stage": "PREPAY_ASYNC",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Activity outside curated specialty map but not legally prohibited",
+      "requirements_raw": "`cfg.specialty_map`, cross-specialty privileges, sample-based validation",
+      "parameters_explicit": [
+        "specialty_map"
+      ],
+      "exclusions": {
+        "raw_combined_with_configuration": "`cfg.specialty_map`, cross-specialty privileges, sample-based validation",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Coding review, not reject",
+        "canonical_candidates_heuristic": [
+          "REJECT"
+        ],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "ENT-03",
+      "scenario_name": "Provider/facility licence, exclusion and privilege",
+      "priority_raw": "P0",
+      "rule_id": "ENT-03-R05",
+      "rule_name": "Dormant/new/non-operational provider burst",
+      "type_expression": "S",
+      "types": [
+        "S"
+      ],
+      "stage_label": "DAILY",
+      "canonical_stage": "POSTPAY_DAILY",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "New/reactivated provider immediately exceeds specialty volume/value percentile or lacks expected operating footprint",
+      "requirements_raw": "Credentialing date, acquisition/merger and new contract",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Credentialing date, acquisition/merger and new contract",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "SIU/provider-enrollment lead",
+        "canonical_candidates_heuristic": [
+          "SIU_LEAD"
+        ],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "ENT-04",
+      "scenario_name": "Rendering identity and clinician activity integrity",
+      "priority_raw": "P1",
+      "rule_id": "ENT-04-R01",
+      "rule_name": "Missing/invalid rendering clinician",
+      "type_expression": "H",
+      "types": [
+        "H"
+      ],
+      "stage_label": "PREPAY",
+      "canonical_stage": "PREPAY_SYNC",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Service family requires rendering clinician and ID is null, facility-only, or invalid",
+      "requirements_raw": "Role requirement by activity/encounter",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Role requirement by activity/encounter",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Return/pend",
+        "canonical_candidates_heuristic": [
+          "RETURN",
+          "PREPAY_PEND"
+        ],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "ENT-04",
+      "scenario_name": "Rendering identity and clinician activity integrity",
+      "priority_raw": "P1",
+      "rule_id": "ENT-04-R02",
+      "rule_name": "Billing-rendering role conflict",
+      "type_expression": "H/E",
+      "types": [
+        "H",
+        "E"
+      ],
+      "stage_label": "PREPAY",
+      "canonical_stage": "PREPAY_SYNC",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Billing/rendering/ordering/supervising combination violates explicit role rule",
+      "requirements_raw": "Incident-to/team care and supervision policy",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Incident-to/team care and supervision policy",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Pend with role conflict",
+        "canonical_candidates_heuristic": [
+          "PREPAY_PEND"
+        ],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "ENT-04",
+      "scenario_name": "Rendering identity and clinician activity integrity",
+      "priority_raw": "P1",
+      "rule_id": "ENT-04-R03",
+      "rule_name": "Concurrent clinician services",
+      "type_expression": "S",
+      "types": [
+        "S"
+      ],
+      "stage_label": "DAILY",
+      "canonical_stage": "POSTPAY_DAILY",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Clinician has overlapping time-dependent services beyond `cfg.max_concurrency`",
+      "requirements_raw": "Team procedures, anesthesia concurrency, date-only records",
+      "parameters_explicit": [
+        "max_concurrency"
+      ],
+      "exclusions": {
+        "raw_combined_with_configuration": "Team procedures, anesthesia concurrency, date-only records",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Provider case with timeline",
+        "canonical_candidates_heuristic": [],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "ENT-04",
+      "scenario_name": "Rendering identity and clinician activity integrity",
+      "priority_raw": "P1",
+      "rule_id": "ENT-04-R04",
+      "rule_name": "Geographic or leave impossibility",
+      "type_expression": "S",
+      "types": [
+        "S"
+      ],
+      "stage_label": "DAILY",
+      "canonical_stage": "POSTPAY_DAILY",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Clinician claims during confirmed leave/out-of-country period or impossible facility travel",
+      "requirements_raw": "Timestamp/source reliability",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Timestamp/source reliability",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "SIU lead if repeated",
+        "canonical_candidates_heuristic": [
+          "SIU_LEAD"
+        ],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "ENT-05",
+      "scenario_name": "Encounter type/place-of-service misrepresentation",
+      "priority_raw": "P0",
+      "rule_id": "ENT-05-R01",
+      "rule_name": "Facility-type incompatibility",
+      "type_expression": "H",
+      "types": [
+        "H"
+      ],
+      "stage_label": "PREPAY",
+      "canonical_stage": "PREPAY_SYNC",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Claimed encounter/activity requires a facility type not matching licence",
+      "requirements_raw": "Mobile/home/telehealth exceptions",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Mobile/home/telehealth exceptions",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Reject/pend",
+        "canonical_candidates_heuristic": [
+          "REJECT",
+          "PREPAY_PEND"
+        ],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "ENT-05",
+      "scenario_name": "Encounter type/place-of-service misrepresentation",
+      "priority_raw": "P0",
+      "rule_id": "ENT-05-R02",
+      "rule_name": "Admission evidence conflict",
+      "type_expression": "H/E",
+      "types": [
+        "H",
+        "E"
+      ],
+      "stage_label": "PREPAY_ASYNC",
+      "canonical_stage": "PREPAY_ASYNC",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Inpatient/ICU/day-case billing lacks admission, bed, discharge or required Observation trail",
+      "requirements_raw": "Data latency and transferred cases",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Data latency and transferred cases",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Pend for records",
+        "canonical_candidates_heuristic": [
+          "PREPAY_PEND"
+        ],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "ENT-05",
+      "scenario_name": "Encounter type/place-of-service misrepresentation",
+      "priority_raw": "P0",
+      "rule_id": "ENT-05-R03",
+      "rule_name": "Related-claim setting conflict",
+      "type_expression": "E",
+      "types": [
+        "E"
+      ],
+      "stage_label": "DAILY",
+      "canonical_stage": "POSTPAY_DAILY",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Professional and facility claims for same episode disagree on setting",
+      "requirements_raw": "Cross-facility transfer, independent practitioner",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Cross-facility transfer, independent practitioner",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Correlated episode case",
+        "canonical_candidates_heuristic": [],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "ENT-05",
+      "scenario_name": "Encounter type/place-of-service misrepresentation",
+      "priority_raw": "P0",
+      "rule_id": "ENT-05-R04",
+      "rule_name": "Setting-shift anomaly",
+      "type_expression": "S",
+      "types": [
+        "S"
+      ],
+      "stage_label": "MONTHLY",
+      "canonical_stage": "MODEL_MONTHLY",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Provider's better-paid setting share rises beyond changepoint and peer threshold",
+      "requirements_raw": "Contract/facility change segmentation",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Contract/facility change segmentation",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Postpay audit",
+        "canonical_candidates_heuristic": [
+          "POSTPAY_AUDIT"
+        ],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "ENT-06",
+      "scenario_name": "Telehealth encounter and downstream-order integrity",
+      "priority_raw": "P1",
+      "rule_id": "ENT-06-R01",
+      "rule_name": "Telehealth eligibility/setting failure",
+      "type_expression": "H",
+      "types": [
+        "H"
+      ],
+      "stage_label": "PREPAY",
+      "canonical_stage": "PREPAY_SYNC",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Telehealth code billed for ineligible service, member geography or provider privilege",
+      "requirements_raw": "Regulator/product telehealth rules",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Regulator/product telehealth rules",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Reject/pend",
+        "canonical_candidates_heuristic": [
+          "REJECT",
+          "PREPAY_PEND"
+        ],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "ENT-06",
+      "scenario_name": "Telehealth encounter and downstream-order integrity",
+      "priority_raw": "P1",
+      "rule_id": "ENT-06-R02",
+      "rule_name": "No meaningful clinical interaction",
+      "type_expression": "E/T",
+      "types": [
+        "E",
+        "T"
+      ],
+      "stage_label": "ASYNC",
+      "canonical_stage": "PREPAY_ASYNC",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Remote order has no qualifying encounter/note or interaction duration below policy minimum",
+      "requirements_raw": "Asynchronous-care rules and emergencies",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Asynchronous-care rules and emergencies",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Clinical review",
+        "canonical_candidates_heuristic": [],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "ENT-06",
+      "scenario_name": "Telehealth encounter and downstream-order integrity",
+      "priority_raw": "P1",
+      "rule_id": "ENT-06-R03",
+      "rule_name": "Downstream referral concentration",
+      "type_expression": "S/N",
+      "types": [
+        "S",
+        "N"
+      ],
+      "stage_label": "WEEKLY",
+      "canonical_stage": "NETWORK_WEEKLY",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Telehealth provider sends share above peer threshold to one lab/pharmacy/device supplier",
+      "requirements_raw": "Corporate ownership and narrow network",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Corporate ownership and narrow network",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Network lead",
+        "canonical_candidates_heuristic": [],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "ENT-06",
+      "scenario_name": "Telehealth encounter and downstream-order integrity",
+      "priority_raw": "P1",
+      "rule_id": "ENT-06-R04",
+      "rule_name": "Remote-order conversion spike",
+      "type_expression": "S",
+      "types": [
+        "S"
+      ],
+      "stage_label": "DAILY",
+      "canonical_stage": "POSTPAY_DAILY",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Downstream high-cost test/drug/device conversion materially exceeds adjusted peers",
+      "requirements_raw": "Specialty, diagnosis and campaign/new-service change",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Specialty, diagnosis and campaign/new-service change",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Postpay/SIU lead",
+        "canonical_candidates_heuristic": [
+          "POSTPAY_AUDIT",
+          "SIU_LEAD"
+        ],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "PAY-01",
+      "scenario_name": "Exact, near and cross-submission duplicate billing",
+      "priority_raw": "P0",
+      "rule_id": "PAY-01-R01",
+      "rule_name": "Exact line duplicate",
+      "type_expression": "H",
+      "types": [
+        "H"
+      ],
+      "stage_label": "PREPAY",
+      "canonical_stage": "PREPAY_SYNC",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Same payer/member/provider/code/date/units/amount and no valid repeat indicator in active lineage",
+      "requirements_raw": "Replacement/cancelled line, bilateral/repeat rule",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Replacement/cancelled line, bilateral/repeat rule",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Reject later line",
+        "canonical_candidates_heuristic": [
+          "REJECT"
+        ],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "PAY-01",
+      "scenario_name": "Exact, near and cross-submission duplicate billing",
+      "priority_raw": "P0",
+      "rule_id": "PAY-01-R02",
+      "rule_name": "Near duplicate",
+      "type_expression": "H",
+      "types": [
+        "H"
+      ],
+      "stage_label": "ASYNC",
+      "canonical_stage": "PREPAY_ASYNC",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Same clinical service with changed claim ID, amount, units or code equivalent within `cfg.window`",
+      "requirements_raw": "Staged/repeat services and code-equivalence map",
+      "parameters_explicit": [
+        "window"
+      ],
+      "exclusions": {
+        "raw_combined_with_configuration": "Staged/repeat services and code-equivalence map",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Pend with matched line",
+        "canonical_candidates_heuristic": [
+          "PREPAY_PEND"
+        ],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "PAY-01",
+      "scenario_name": "Exact, near and cross-submission duplicate billing",
+      "priority_raw": "P0",
+      "rule_id": "PAY-01-R03",
+      "rule_name": "Split-claim duplicate",
+      "type_expression": "H",
+      "types": [
+        "H"
+      ],
+      "stage_label": "DAILY",
+      "canonical_stage": "POSTPAY_DAILY",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Component/identical service appears across claim headers for same episode",
+      "requirements_raw": "Facility/professional legitimate split",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Facility/professional legitimate split",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Reprice/pend episode",
+        "canonical_candidates_heuristic": [
+          "REPRICE",
+          "PREPAY_PEND"
+        ],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "PAY-01",
+      "scenario_name": "Exact, near and cross-submission duplicate billing",
+      "priority_raw": "P0",
+      "rule_id": "PAY-01-R04",
+      "rule_name": "Cross-payer duplicate",
+      "type_expression": "H/S",
+      "types": [
+        "H",
+        "S"
+      ],
+      "stage_label": "DAILY",
+      "canonical_stage": "POSTPAY_DAILY",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Privacy-preserving member/service match paid by multiple payers",
+      "requirements_raw": "Only authorized data-sharing/COB data; payment status required",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Only authorized data-sharing/COB data; payment status required",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Recovery/coordination case",
+        "canonical_candidates_heuristic": [
+          "POSTPAY_AUDIT"
+        ],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "PAY-02",
+      "scenario_name": "Unbundling and inclusive/package/DRG leakage",
+      "priority_raw": "P0",
+      "rule_id": "PAY-02-R01",
+      "rule_name": "Same-claim component edit",
+      "type_expression": "H",
+      "types": [
+        "H"
+      ],
+      "stage_label": "PREPAY",
+      "canonical_stage": "PREPAY_SYNC",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Parent and separately payable component match effective bundling edit",
+      "requirements_raw": "Permitted indicator and edit version",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Permitted indicator and edit version",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Reprice/reject component",
+        "canonical_candidates_heuristic": [
+          "REJECT",
+          "REPRICE"
+        ],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "PAY-02",
+      "scenario_name": "Unbundling and inclusive/package/DRG leakage",
+      "priority_raw": "P0",
+      "rule_id": "PAY-02-R02",
+      "rule_name": "Cross-claim/cross-provider component",
+      "type_expression": "H/E",
+      "types": [
+        "H",
+        "E"
+      ],
+      "stage_label": "DAILY",
+      "canonical_stage": "POSTPAY_DAILY",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Included component billed on related claim in global/episode window",
+      "requirements_raw": "Contractual professional/facility split",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Contractual professional/facility split",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Episode reprice/pend",
+        "canonical_candidates_heuristic": [
+          "REPRICE",
+          "PREPAY_PEND"
+        ],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "PAY-02",
+      "scenario_name": "Unbundling and inclusive/package/DRG leakage",
+      "priority_raw": "P0",
+      "rule_id": "PAY-02-R03",
+      "rule_name": "Package completeness/zero-price lines",
+      "type_expression": "H",
+      "types": [
+        "H"
+      ],
+      "stage_label": "PREPAY",
+      "canonical_stage": "PREPAY_SYNC",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Required package activities absent, or included activity has non-zero charge",
+      "requirements_raw": "Documented medical omission and local claiming rule",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Documented medical omission and local claiming rule",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Return/reprice",
+        "canonical_candidates_heuristic": [
+          "RETURN",
+          "REPRICE"
+        ],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "PAY-02",
+      "scenario_name": "Unbundling and inclusive/package/DRG leakage",
+      "priority_raw": "P0",
+      "rule_id": "PAY-02-R04",
+      "rule_name": "DRG/inclusive leakage",
+      "type_expression": "H",
+      "types": [
+        "H"
+      ],
+      "stage_label": "DAILY",
+      "canonical_stage": "POSTPAY_DAILY",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "FFS line separately paid although included in DRG/package",
+      "requirements_raw": "Effective inclusions/exclusions, carve-outs",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Effective inclusions/exclusions, carve-outs",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Recovery candidate",
+        "canonical_candidates_heuristic": [
+          "POSTPAY_AUDIT"
+        ],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "PAY-02",
+      "scenario_name": "Unbundling and inclusive/package/DRG leakage",
+      "priority_raw": "P0",
+      "rule_id": "PAY-02-R05",
+      "rule_name": "Novel unbundling pattern",
+      "type_expression": "S",
+      "types": [
+        "S"
+      ],
+      "stage_label": "MONTHLY",
+      "canonical_stage": "MODEL_MONTHLY",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Provider has abnormal profitable component co-occurrence not in known edit table",
+      "requirements_raw": "Minimum volume and peer adjustment",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Minimum volume and peer adjustment",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Policy-review candidate, not denial",
+        "canonical_candidates_heuristic": [
+          "REJECT"
+        ],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "PAY-03",
+      "scenario_name": "Code validity, demographics, units and time billing",
+      "priority_raw": "P0",
+      "rule_id": "PAY-03-R01",
+      "rule_name": "Invalid/effective-date code",
+      "type_expression": "H",
+      "types": [
+        "H"
+      ],
+      "stage_label": "INGEST",
+      "canonical_stage": "INGEST",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Code absent from declared code system/version or inactive at service date",
+      "requirements_raw": "Approved unlisted-code pathway and required Observation",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Approved unlisted-code pathway and required Observation",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Return",
+        "canonical_candidates_heuristic": [
+          "RETURN"
+        ],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "PAY-03",
+      "scenario_name": "Code validity, demographics, units and time billing",
+      "priority_raw": "P0",
+      "rule_id": "PAY-03-R02",
+      "rule_name": "Hard demographic impossibility",
+      "type_expression": "H",
+      "types": [
+        "H"
+      ],
+      "stage_label": "PREPAY",
+      "canonical_stage": "PREPAY_SYNC",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Explicit age/sex restriction fails",
+      "requirements_raw": "Gender/clinical exceptions approved by policy",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Gender/clinical exceptions approved by policy",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Reject/pend",
+        "canonical_candidates_heuristic": [
+          "REJECT",
+          "PREPAY_PEND"
+        ],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "PAY-03",
+      "scenario_name": "Code validity, demographics, units and time billing",
+      "priority_raw": "P0",
+      "rule_id": "PAY-03-R03",
+      "rule_name": "Unit maximum",
+      "type_expression": "H/E",
+      "types": [
+        "H",
+        "E"
+      ],
+      "stage_label": "PREPAY",
+      "canonical_stage": "PREPAY_SYNC",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Daily/episode units exceed administrative or clinical maximum",
+      "requirements_raw": "Repeat/laterality, dose, inpatient rules",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Repeat/laterality, dose, inpatient rules",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Reprice or clinical pend",
+        "canonical_candidates_heuristic": [
+          "REPRICE",
+          "PREPAY_PEND"
+        ],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "PAY-03",
+      "scenario_name": "Code validity, demographics, units and time billing",
+      "priority_raw": "P0",
+      "rule_id": "PAY-03-R04",
+      "rule_name": "Time-unit inconsistency",
+      "type_expression": "H/E",
+      "types": [
+        "H",
+        "E"
+      ],
+      "stage_label": "PREPAY",
+      "canonical_stage": "PREPAY_SYNC",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Time-derived units do not match start/end time or overlap impossible services",
+      "requirements_raw": "Rounding policy, anesthesia concurrency",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Rounding policy, anesthesia concurrency",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Reprice/pend",
+        "canonical_candidates_heuristic": [
+          "REPRICE",
+          "PREPAY_PEND"
+        ],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "PAY-04",
+      "scenario_name": "Prior-authorization compliance and scope",
+      "priority_raw": "P0",
+      "rule_id": "PAY-04-R01",
+      "rule_name": "Missing required authorization",
+      "type_expression": "H",
+      "types": [
+        "H"
+      ],
+      "stage_label": "PREPAY",
+      "canonical_stage": "PREPAY_SYNC",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Activity requires authorization and no valid link exists",
+      "requirements_raw": "Emergency, deemed approval, response-time exception",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Emergency, deemed approval, response-time exception",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Pend/reject",
+        "canonical_candidates_heuristic": [
+          "REJECT",
+          "PREPAY_PEND"
+        ],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "PAY-04",
+      "scenario_name": "Prior-authorization compliance and scope",
+      "priority_raw": "P0",
+      "rule_id": "PAY-04-R02",
+      "rule_name": "Invalid timing/status",
+      "type_expression": "H",
+      "types": [
+        "H"
+      ],
+      "stage_label": "PREPAY",
+      "canonical_stage": "PREPAY_SYNC",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Service outside authorization validity or authorization denied/cancelled",
+      "requirements_raw": "Approved extension and urgent retrospective route",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Approved extension and urgent retrospective route",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Pend/reject",
+        "canonical_candidates_heuristic": [
+          "REJECT",
+          "PREPAY_PEND"
+        ],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "PAY-04",
+      "scenario_name": "Prior-authorization compliance and scope",
+      "priority_raw": "P0",
+      "rule_id": "PAY-04-R03",
+      "rule_name": "Code/provider/facility scope mismatch",
+      "type_expression": "H",
+      "types": [
+        "H"
+      ],
+      "stage_label": "PREPAY",
+      "canonical_stage": "PREPAY_SYNC",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Claim dimension not equal/equivalent to approved dimension",
+      "requirements_raw": "Equivalent-code map and approved transfer",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Equivalent-code map and approved transfer",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Pend",
+        "canonical_candidates_heuristic": [
+          "PREPAY_PEND"
+        ],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "PAY-04",
+      "scenario_name": "Prior-authorization compliance and scope",
+      "priority_raw": "P0",
+      "rule_id": "PAY-04-R04",
+      "rule_name": "Quantity/value exhaustion",
+      "type_expression": "H",
+      "types": [
+        "H"
+      ],
+      "stage_label": "PREPAY",
+      "canonical_stage": "PREPAY_SYNC",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Cumulative claimed/paid plus current exceeds approved units/value",
+      "requirements_raw": "Cancelled/reversed claims and partial fills",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Cancelled/reversed claims and partial fills",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Reprice/pend excess",
+        "canonical_candidates_heuristic": [
+          "REPRICE",
+          "PREPAY_PEND"
+        ],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "PAY-04",
+      "scenario_name": "Prior-authorization compliance and scope",
+      "priority_raw": "P0",
+      "rule_id": "PAY-04-R05",
+      "rule_name": "Authorization reuse",
+      "type_expression": "H/S",
+      "types": [
+        "H",
+        "S"
+      ],
+      "stage_label": "DAILY",
+      "canonical_stage": "POSTPAY_DAILY",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Same authorization consumed by unrelated members/episodes/providers or after exhaustion",
+      "requirements_raw": "Family/shared authorization only if policy permits",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Family/shared authorization only if policy permits",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "SIU/prepay lead",
+        "canonical_candidates_heuristic": [
+          "SIU_LEAD"
+        ],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "PAY-05",
+      "scenario_name": "Modifier, indicator and edit-bypass abuse",
+      "priority_raw": "P1",
+      "rule_id": "PAY-05-R01",
+      "rule_name": "Prohibited code-indicator pair",
+      "type_expression": "H",
+      "types": [
+        "H"
+      ],
+      "stage_label": "PREPAY",
+      "canonical_stage": "PREPAY_SYNC",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Pair absent/prohibited in effective policy table",
+      "requirements_raw": "Local indicator rules; never import foreign rules blindly",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Local indicator rules; never import foreign rules blindly",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Return/reject",
+        "canonical_candidates_heuristic": [
+          "RETURN",
+          "REJECT"
+        ],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "PAY-05",
+      "scenario_name": "Modifier, indicator and edit-bypass abuse",
+      "priority_raw": "P1",
+      "rule_id": "PAY-05-R02",
+      "rule_name": "Required support absent",
+      "type_expression": "E/T",
+      "types": [
+        "E",
+        "T"
+      ],
+      "stage_label": "ASYNC",
+      "canonical_stage": "PREPAY_ASYNC",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Enabling indicator requires Observation/report/narrative and artifact is missing",
+      "requirements_raw": "Document arrival latency",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Document arrival latency",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Pend",
+        "canonical_candidates_heuristic": [
+          "PREPAY_PEND"
+        ],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "PAY-05",
+      "scenario_name": "Modifier, indicator and edit-bypass abuse",
+      "priority_raw": "P1",
+      "rule_id": "PAY-05-R03",
+      "rule_name": "Provider use-rate outlier",
+      "type_expression": "S",
+      "types": [
+        "S"
+      ],
+      "stage_label": "MONTHLY",
+      "canonical_stage": "MODEL_MONTHLY",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Indicator rate exceeds shrunk specialty peer percentile",
+      "requirements_raw": "Minimum denominator, facility/payment model",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Minimum denominator, facility/payment model",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Postpay audit",
+        "canonical_candidates_heuristic": [
+          "POSTPAY_AUDIT"
+        ],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "PAY-05",
+      "scenario_name": "Modifier, indicator and edit-bypass abuse",
+      "priority_raw": "P1",
+      "rule_id": "PAY-05-R04",
+      "rule_name": "Post-edit migration",
+      "type_expression": "S",
+      "types": [
+        "S"
+      ],
+      "stage_label": "MONTHLY",
+      "canonical_stage": "MODEL_MONTHLY",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Usage spikes after new edit and disproportionately converts denials to payment",
+      "requirements_raw": "Rule launch and provider education periods",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Rule launch and provider education periods",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Payment-integrity case",
+        "canonical_candidates_heuristic": [],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "PAY-06",
+      "scenario_name": "Tariff, contract and billed-amount manipulation",
+      "priority_raw": "P0",
+      "rule_id": "PAY-06-R01",
+      "rule_name": "Tariff/contract price variance",
+      "type_expression": "H",
+      "types": [
+        "H"
+      ],
+      "stage_label": "PREPAY",
+      "canonical_stage": "PREPAY_SYNC",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Submitted price basis differs from effective allowed price outside rounding tolerance",
+      "requirements_raw": "Negotiated carve-outs, VAT and currency policy",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Negotiated carve-outs, VAT and currency policy",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Reprice",
+        "canonical_candidates_heuristic": [
+          "REPRICE"
+        ],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "PAY-06",
+      "scenario_name": "Tariff, contract and billed-amount manipulation",
+      "priority_raw": "P0",
+      "rule_id": "PAY-06-R02",
+      "rule_name": "Gross/net/share arithmetic failure",
+      "type_expression": "H",
+      "types": [
+        "H"
+      ],
+      "stage_label": "INGEST",
+      "canonical_stage": "INGEST",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Amount relationships violate transaction or contract equation",
+      "requirements_raw": "Approved adjustments and other-insurer amounts",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Approved adjustments and other-insurer amounts",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Return",
+        "canonical_candidates_heuristic": [
+          "RETURN"
+        ],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "PAY-06",
+      "scenario_name": "Tariff, contract and billed-amount manipulation",
+      "priority_raw": "P0",
+      "rule_id": "PAY-06-R03",
+      "rule_name": "Billed amount peer outlier",
+      "type_expression": "S",
+      "types": [
+        "S"
+      ],
+      "stage_label": "DAILY",
+      "canonical_stage": "POSTPAY_DAILY",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Code-level amount above contract-adjusted peer threshold",
+      "requirements_raw": "Case mix, units, implant carve-out",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Case mix, units, implant carve-out",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Pend only with material exposure",
+        "canonical_candidates_heuristic": [
+          "PREPAY_PEND"
+        ],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "PAY-06",
+      "scenario_name": "Tariff, contract and billed-amount manipulation",
+      "priority_raw": "P0",
+      "rule_id": "PAY-06-R04",
+      "rule_name": "Approved-to-billed pattern",
+      "type_expression": "S",
+      "types": [
+        "S"
+      ],
+      "stage_label": "MONTHLY",
+      "canonical_stage": "MODEL_MONTHLY",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Persistent low approval ratio or suspiciously invariant full approval versus peers",
+      "requirements_raw": "Adjudication model and contract differences",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Adjudication model and contract differences",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Education, audit or PAY-11 link",
+        "canonical_candidates_heuristic": [
+          "POSTPAY_AUDIT",
+          "PROVIDER_EDUCATION"
+        ],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "PAY-07",
+      "scenario_name": "Patient-share, copay, deductible and balance billing",
+      "priority_raw": "P0",
+      "rule_id": "PAY-07-R01",
+      "rule_name": "Expected-share mismatch",
+      "type_expression": "H",
+      "types": [
+        "H"
+      ],
+      "stage_label": "PREPAY",
+      "canonical_stage": "PREPAY_SYNC",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Submitted claim/Activity share differs from benefit calculation",
+      "requirements_raw": "Deductible accumulator, exemptions, rounding",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Deductible accumulator, exemptions, rounding",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Reprice/return",
+        "canonical_candidates_heuristic": [
+          "RETURN",
+          "REPRICE"
+        ],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "PAY-07",
+      "scenario_name": "Patient-share, copay, deductible and balance billing",
+      "priority_raw": "P0",
+      "rule_id": "PAY-07-R02",
+      "rule_name": "Share shifted to payer",
+      "type_expression": "H",
+      "types": [
+        "H"
+      ],
+      "stage_label": "PREPAY",
+      "canonical_stage": "PREPAY_SYNC",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "`gross - valid_discount - patient_share != net` or waived share included in net",
+      "requirements_raw": "Approved discount/hardship",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Approved discount/hardship",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Reprice",
+        "canonical_candidates_heuristic": [
+          "REPRICE"
+        ],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "PAY-07",
+      "scenario_name": "Patient-share, copay, deductible and balance billing",
+      "priority_raw": "P0",
+      "rule_id": "PAY-07-R03",
+      "rule_name": "Systematic zero/rounded share",
+      "type_expression": "S",
+      "types": [
+        "S"
+      ],
+      "stage_label": "MONTHLY",
+      "canonical_stage": "MODEL_MONTHLY",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Provider zero-share or repeated-rounding rate exceeds product-adjusted peers",
+      "requirements_raw": "Zero-share benefits and regulator programs",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Zero-share benefits and regulator programs",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Postpay audit",
+        "canonical_candidates_heuristic": [
+          "POSTPAY_AUDIT"
+        ],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "PAY-07",
+      "scenario_name": "Patient-share, copay, deductible and balance billing",
+      "priority_raw": "P0",
+      "rule_id": "PAY-07-R04",
+      "rule_name": "Excess patient charge/balance bill",
+      "type_expression": "H/S",
+      "types": [
+        "H",
+        "S"
+      ],
+      "stage_label": "DAILY",
+      "canonical_stage": "POSTPAY_DAILY",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Receipt/complaint/collection data exceeds approved patient liability",
+      "requirements_raw": "Non-covered elective items with documented consent",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Non-covered elective items with documented consent",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Member protection/provider case",
+        "canonical_candidates_heuristic": [],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "PAY-08",
+      "scenario_name": "Denial-resubmission mutation and gaming",
+      "priority_raw": "P0",
+      "rule_id": "PAY-08-R01",
+      "rule_name": "Missing/broken lineage",
+      "type_expression": "H",
+      "types": [
+        "H"
+      ],
+      "stage_label": "INGEST",
+      "canonical_stage": "INGEST",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Correction/resubmission lacks valid prior payer ID/type or references unrelated claim",
+      "requirements_raw": "Legacy route where permitted",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Legacy route where permitted",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Return",
+        "canonical_candidates_heuristic": [
+          "RETURN"
+        ],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "PAY-08",
+      "scenario_name": "Denial-resubmission mutation and gaming",
+      "priority_raw": "P0",
+      "rule_id": "PAY-08-R02",
+      "rule_name": "Reimbursement-enabling field mutation",
+      "type_expression": "H/E",
+      "types": [
+        "H",
+        "E"
+      ],
+      "stage_label": "ASYNC",
+      "canonical_stage": "PREPAY_ASYNC",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Denied line changes diagnosis, code, units, provider, setting or indicator without coherent correction evidence",
+      "requirements_raw": "Accepted correction matrix by denial code",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Accepted correction matrix by denial code",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Pend with field diff",
+        "canonical_candidates_heuristic": [
+          "PREPAY_PEND"
+        ],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "PAY-08",
+      "scenario_name": "Denial-resubmission mutation and gaming",
+      "priority_raw": "P0",
+      "rule_id": "PAY-08-R03",
+      "rule_name": "Repeated resubmission loop",
+      "type_expression": "S",
+      "types": [
+        "S"
+      ],
+      "stage_label": "DAILY",
+      "canonical_stage": "POSTPAY_DAILY",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Attempts per underlying service exceed `cfg.max_attempts` or alternate variants until paid",
+      "requirements_raw": "Internal complaint/appeal route",
+      "parameters_explicit": [
+        "max_attempts"
+      ],
+      "exclusions": {
+        "raw_combined_with_configuration": "Internal complaint/appeal route",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Provider case",
+        "canonical_candidates_heuristic": [],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "PAY-08",
+      "scenario_name": "Denial-resubmission mutation and gaming",
+      "priority_raw": "P0",
+      "rule_id": "PAY-08-R04",
+      "rule_name": "Edit-learning success anomaly",
+      "type_expression": "S",
+      "types": [
+        "S"
+      ],
+      "stage_label": "MONTHLY",
+      "canonical_stage": "MODEL_MONTHLY",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Provider's mutated resubmission success materially exceeds peers and concentrates on specific denial edits",
+      "requirements_raw": "Biller/vendor and policy-change adjustment",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Biller/vendor and policy-change adjustment",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "SIU/payment-integrity lead",
+        "canonical_candidates_heuristic": [
+          "SIU_LEAD"
+        ],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "PAY-09",
+      "scenario_name": "Disguised non-covered service or product",
+      "priority_raw": "P0",
+      "rule_id": "PAY-09-R01",
+      "rule_name": "Code-description/document conflict",
+      "type_expression": "E/T",
+      "types": [
+        "E",
+        "T"
+      ],
+      "stage_label": "ASYNC",
+      "canonical_stage": "PREPAY_ASYNC",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Note/order/Observation describes an uncovered service while claim uses covered code",
+      "requirements_raw": "NLP confidence and clinician review",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "NLP confidence and clinician review",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Pend",
+        "canonical_candidates_heuristic": [
+          "PREPAY_PEND"
+        ],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "PAY-09",
+      "scenario_name": "Disguised non-covered service or product",
+      "priority_raw": "P0",
+      "rule_id": "PAY-09-R02",
+      "rule_name": "Covered-code substitution pattern",
+      "type_expression": "S",
+      "types": [
+        "S"
+      ],
+      "stage_label": "MONTHLY",
+      "canonical_stage": "MODEL_MONTHLY",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Provider uses a payable proxy code unusually often around denied/non-covered services",
+      "requirements_raw": "Code-family and denial-history map",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Code-family and denial-history map",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Postpay audit",
+        "canonical_candidates_heuristic": [
+          "POSTPAY_AUDIT"
+        ],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "PAY-09",
+      "scenario_name": "Disguised non-covered service or product",
+      "priority_raw": "P0",
+      "rule_id": "PAY-09-R03",
+      "rule_name": "Cosmetic/alternative/non-medical disguise",
+      "type_expression": "E",
+      "types": [
+        "E"
+      ],
+      "stage_label": "PREPAY",
+      "canonical_stage": "PREPAY_SYNC",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Diagnosis, setting and product combination matches approved disguise-risk policy",
+      "requirements_raw": "Reconstructive/medical-necessity exceptions",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Reconstructive/medical-necessity exceptions",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Clinical pend",
+        "canonical_candidates_heuristic": [
+          "PREPAY_PEND"
+        ],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "PAY-09",
+      "scenario_name": "Disguised non-covered service or product",
+      "priority_raw": "P0",
+      "rule_id": "PAY-09-R04",
+      "rule_name": "Member/provider confirmation mismatch",
+      "type_expression": "S",
+      "types": [
+        "S"
+      ],
+      "stage_label": "DAILY",
+      "canonical_stage": "POSTPAY_DAILY",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Member receipt/confirmation describes different item/service than billed",
+      "requirements_raw": "Confirmation reliability and consent",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Confirmation reliability and consent",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "SIU lead",
+        "canonical_candidates_heuristic": [
+          "SIU_LEAD"
+        ],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "PAY-10",
+      "scenario_name": "Coordination of benefits and third-party liability",
+      "priority_raw": "P1",
+      "rule_id": "PAY-10-R01",
+      "rule_name": "Other coverage not coordinated",
+      "type_expression": "H",
+      "types": [
+        "H"
+      ],
+      "stage_label": "PREPAY",
+      "canonical_stage": "PREPAY_SYNC",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Active primary/other coverage exists but claim submitted with wrong payer order",
+      "requirements_raw": "UAE/product COB policy",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "UAE/product COB policy",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Pend/reprice",
+        "canonical_candidates_heuristic": [
+          "REPRICE",
+          "PREPAY_PEND"
+        ],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "PAY-10",
+      "scenario_name": "Coordination of benefits and third-party liability",
+      "priority_raw": "P1",
+      "rule_id": "PAY-10-R02",
+      "rule_name": "Multi-payer overpayment",
+      "type_expression": "H",
+      "types": [
+        "H"
+      ],
+      "stage_label": "DAILY",
+      "canonical_stage": "POSTPAY_DAILY",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Sum of payer payments + patient liability exceeds allowable charge",
+      "requirements_raw": "Lawful top-up and benefit coordination",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Lawful top-up and benefit coordination",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Recovery case",
+        "canonical_candidates_heuristic": [
+          "POSTPAY_AUDIT"
+        ],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "PAY-10",
+      "scenario_name": "Coordination of benefits and third-party liability",
+      "priority_raw": "P1",
+      "rule_id": "PAY-10-R03",
+      "rule_name": "Accident/liability indicator missing",
+      "type_expression": "H/E",
+      "types": [
+        "H",
+        "E"
+      ],
+      "stage_label": "PREPAY",
+      "canonical_stage": "PREPAY_SYNC",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Diagnosis/encounter suggests road/work/third-party event but liable-party fields absent",
+      "requirements_raw": "Clinical false-positive list",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Clinical false-positive list",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Pend for coordination data",
+        "canonical_candidates_heuristic": [
+          "PREPAY_PEND"
+        ],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "PAY-10",
+      "scenario_name": "Coordination of benefits and third-party liability",
+      "priority_raw": "P1",
+      "rule_id": "PAY-10-R04",
+      "rule_name": "Duplicate recovery after settlement",
+      "type_expression": "H",
+      "types": [
+        "H"
+      ],
+      "stage_label": "DAILY",
+      "canonical_stage": "POSTPAY_DAILY",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Claim paid by health payer after documented third-party settlement without offset",
+      "requirements_raw": "Subrogation/recovery policy",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Subrogation/recovery policy",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Recovery workflow",
+        "canonical_candidates_heuristic": [
+          "POSTPAY_AUDIT"
+        ],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "PAY-11",
+      "scenario_name": "Internal adjudication, override and payment manipulation",
+      "priority_raw": "P1",
+      "rule_id": "PAY-11-R01",
+      "rule_name": "Unauthorized/manual override",
+      "type_expression": "H",
+      "types": [
+        "H"
+      ],
+      "stage_label": "DAILY",
+      "canonical_stage": "POSTPAY_DAILY",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Denial/edit overridden without required role, approval or reason",
+      "requirements_raw": "Emergency escalation and delegated authority",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Emergency escalation and delegated authority",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Internal-control case",
+        "canonical_candidates_heuristic": [],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "PAY-11",
+      "scenario_name": "Internal adjudication, override and payment manipulation",
+      "priority_raw": "P1",
+      "rule_id": "PAY-11-R02",
+      "rule_name": "Adjudicator-provider concentration",
+      "type_expression": "S/N",
+      "types": [
+        "S",
+        "N"
+      ],
+      "stage_label": "MONTHLY",
+      "canonical_stage": "MODEL_MONTHLY",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Employee's override/payment volume to provider materially exceeds adjusted peers",
+      "requirements_raw": "Assigned provider books and specialty",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Assigned provider books and specialty",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Compliance/SIU lead",
+        "canonical_candidates_heuristic": [
+          "SIU_LEAD"
+        ],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "PAY-11",
+      "scenario_name": "Internal adjudication, override and payment manipulation",
+      "priority_raw": "P1",
+      "rule_id": "PAY-11-R03",
+      "rule_name": "Post-settlement upward adjustment",
+      "type_expression": "H/S",
+      "types": [
+        "H",
+        "S"
+      ],
+      "stage_label": "DAILY",
+      "canonical_stage": "POSTPAY_DAILY",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Paid amount increased after settlement without valid adjustment reason/workflow",
+      "requirements_raw": "Contract true-up and appeal decision",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Contract true-up and appeal decision",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Internal audit case",
+        "canonical_candidates_heuristic": [
+          "POSTPAY_AUDIT"
+        ],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "PAY-11",
+      "scenario_name": "Internal adjudication, override and payment manipulation",
+      "priority_raw": "P1",
+      "rule_id": "PAY-11-R04",
+      "rule_name": "Suspicious full-pay/invariant decisions",
+      "type_expression": "S",
+      "types": [
+        "S"
+      ],
+      "stage_label": "MONTHLY",
+      "canonical_stage": "MODEL_MONTHLY",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Adjudicator/provider pair shows unusually high approval and low variance despite comparable edits",
+      "requirements_raw": "Auto-adjudicated claims excluded",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Auto-adjudicated claims excluded",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Internal audit lead",
+        "canonical_candidates_heuristic": [
+          "POSTPAY_AUDIT"
+        ],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "PAY-12",
+      "scenario_name": "Reversal, refund, credit-balance and remittance leakage",
+      "priority_raw": "P1",
+      "rule_id": "PAY-12-R01",
+      "rule_name": "Paid cancelled/reversed claim",
+      "type_expression": "H",
+      "types": [
+        "H"
+      ],
+      "stage_label": "DAILY",
+      "canonical_stage": "POSTPAY_DAILY",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Net payment remains after effective cancellation/reversal",
+      "requirements_raw": "Timing tolerance and netting process",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Timing tolerance and netting process",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Recovery",
+        "canonical_candidates_heuristic": [
+          "POSTPAY_AUDIT"
+        ],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "PAY-12",
+      "scenario_name": "Reversal, refund, credit-balance and remittance leakage",
+      "priority_raw": "P1",
+      "rule_id": "PAY-12-R02",
+      "rule_name": "Duplicate remittance/payment reference",
+      "type_expression": "H",
+      "types": [
+        "H"
+      ],
+      "stage_label": "DAILY",
+      "canonical_stage": "POSTPAY_DAILY",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Same payable claim/line paid more than once or payment reference reused inconsistently",
+      "requirements_raw": "Split settlement and batch payments",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Split settlement and batch payments",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Finance pend/recovery",
+        "canonical_candidates_heuristic": [
+          "PREPAY_PEND",
+          "POSTPAY_AUDIT"
+        ],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "PAY-12",
+      "scenario_name": "Reversal, refund, credit-balance and remittance leakage",
+      "priority_raw": "P1",
+      "rule_id": "PAY-12-R03",
+      "rule_name": "Unapplied provider refund/credit",
+      "type_expression": "H",
+      "types": [
+        "H"
+      ],
+      "stage_label": "DAILY",
+      "canonical_stage": "POSTPAY_DAILY",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Received credit/refund not linked to outstanding recovery within SLA",
+      "requirements_raw": "Dispute and unapplied-cash queue",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Dispute and unapplied-cash queue",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Finance exception",
+        "canonical_candidates_heuristic": [],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "PAY-12",
+      "scenario_name": "Reversal, refund, credit-balance and remittance leakage",
+      "priority_raw": "P1",
+      "rule_id": "PAY-12-R04",
+      "rule_name": "Negative/offset manipulation",
+      "type_expression": "S",
+      "types": [
+        "S"
+      ],
+      "stage_label": "MONTHLY",
+      "canonical_stage": "MODEL_MONTHLY",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Provider repeatedly offsets credits against unrelated claims or delays reversals versus peers",
+      "requirements_raw": "Contractual netting rules",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Contractual netting rules",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Postpay audit",
+        "canonical_candidates_heuristic": [
+          "POSTPAY_AUDIT"
+        ],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "CLN-01",
+      "scenario_name": "Upcoding and code-intensity inflation",
+      "priority_raw": "P0",
+      "rule_id": "CLN-01-R01",
+      "rule_name": "High-level code share",
+      "type_expression": "S",
+      "types": [
+        "S"
+      ],
+      "stage_label": "MONTHLY",
+      "canonical_stage": "MODEL_MONTHLY",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Highest-paid level share in code family exceeds shrunk peer percentile",
+      "requirements_raw": "Specialty, setting, case mix, minimum `n`",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Specialty, setting, case mix, minimum `n`",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Provider coding case",
+        "canonical_candidates_heuristic": [],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "CLN-01",
+      "scenario_name": "Upcoding and code-intensity inflation",
+      "priority_raw": "P0",
+      "rule_id": "CLN-01-R02",
+      "rule_name": "Expected-level residual",
+      "type_expression": "S/M",
+      "types": [
+        "S",
+        "M"
+      ],
+      "stage_label": "DAILY",
+      "canonical_stage": "POSTPAY_DAILY",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Billed level exceeds level predicted from diagnoses, age, setting and prior utilization by `cfg.delta`",
+      "requirements_raw": "Interpretable ordinal model; no document features at scoring time if unavailable",
+      "parameters_explicit": [
+        "delta"
+      ],
+      "exclusions": {
+        "raw_combined_with_configuration": "Interpretable ordinal model; no document features at scoring time if unavailable",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Prepay sample",
+        "canonical_candidates_heuristic": [
+          "PREPAY_PEND"
+        ],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "CLN-01",
+      "scenario_name": "Upcoding and code-intensity inflation",
+      "priority_raw": "P0",
+      "rule_id": "CLN-01-R03",
+      "rule_name": "Documentation-level conflict",
+      "type_expression": "E/T",
+      "types": [
+        "E",
+        "T"
+      ],
+      "stage_label": "ASYNC",
+      "canonical_stage": "PREPAY_ASYNC",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Extracted work/severity/time elements do not meet policy for billed level",
+      "requirements_raw": "Validated Arabic/English extraction and human review",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Validated Arabic/English extraction and human review",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Coding pend",
+        "canonical_candidates_heuristic": [
+          "PREPAY_PEND"
+        ],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "CLN-01",
+      "scenario_name": "Upcoding and code-intensity inflation",
+      "priority_raw": "P0",
+      "rule_id": "CLN-01-R04",
+      "rule_name": "Level migration changepoint",
+      "type_expression": "S",
+      "types": [
+        "S"
+      ],
+      "stage_label": "MONTHLY",
+      "canonical_stage": "MODEL_MONTHLY",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Provider abruptly shifts to higher code levels absent case-mix/contract change",
+      "requirements_raw": "Segment known structural changes",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Segment known structural changes",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Postpay sample audit",
+        "canonical_candidates_heuristic": [
+          "POSTPAY_AUDIT"
+        ],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "CLN-02",
+      "scenario_name": "Diagnosis, comorbidity and DRG severity manipulation",
+      "priority_raw": "P0/P1",
+      "rule_id": "CLN-02-R01",
+      "rule_name": "Payment-changing secondary diagnosis",
+      "type_expression": "H/E",
+      "types": [
+        "H",
+        "E"
+      ],
+      "stage_label": "DAILY",
+      "canonical_stage": "POSTPAY_DAILY",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Removing suspect secondary diagnosis lowers DRG/payment and code lacks required supporting evidence",
+      "requirements_raw": "Current grouper and audit policy",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Current grouper and audit policy",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Coding audit candidate",
+        "canonical_candidates_heuristic": [
+          "POSTPAY_AUDIT"
+        ],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "CLN-02",
+      "scenario_name": "Diagnosis, comorbidity and DRG severity manipulation",
+      "priority_raw": "P0/P1",
+      "rule_id": "CLN-02-R02",
+      "rule_name": "Comorbidity prevalence outlier",
+      "type_expression": "S",
+      "types": [
+        "S"
+      ],
+      "stage_label": "MONTHLY",
+      "canonical_stage": "MODEL_MONTHLY",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Provider's CC/MCC or local severity-code rate exceeds risk-adjusted peers",
+      "requirements_raw": "DRG, age, transfer, specialty, minimum volume",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "DRG, age, transfer, specialty, minimum volume",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Provider case",
+        "canonical_candidates_heuristic": [],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "CLN-02",
+      "scenario_name": "Diagnosis, comorbidity and DRG severity manipulation",
+      "priority_raw": "P0/P1",
+      "rule_id": "CLN-02-R03",
+      "rule_name": "Prior-history inconsistency",
+      "type_expression": "E/S",
+      "types": [
+        "E",
+        "S"
+      ],
+      "stage_label": "DAILY",
+      "canonical_stage": "POSTPAY_DAILY",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Acute/severe diagnosis materially conflicts with longitudinal history and episode evidence",
+      "requirements_raw": "New diagnoses allowed; absence is weak evidence",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "New diagnoses allowed; absence is weak evidence",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Prioritize record review",
+        "canonical_candidates_heuristic": [],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "CLN-02",
+      "scenario_name": "Diagnosis, comorbidity and DRG severity manipulation",
+      "priority_raw": "P0/P1",
+      "rule_id": "CLN-02-R04",
+      "rule_name": "POA/sequencing conflict",
+      "type_expression": "H/E",
+      "types": [
+        "H",
+        "E"
+      ],
+      "stage_label": "PREPAY",
+      "canonical_stage": "PREPAY_SYNC",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "POA or principal/secondary sequence violates effective coding policy",
+      "requirements_raw": "Transfer and obstetric/newborn rules",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Transfer and obstetric/newborn rules",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Coding pend",
+        "canonical_candidates_heuristic": [
+          "PREPAY_PEND"
+        ],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "CLN-02",
+      "scenario_name": "Diagnosis, comorbidity and DRG severity manipulation",
+      "priority_raw": "P0/P1",
+      "rule_id": "CLN-02-R05",
+      "rule_name": "Severity-mix changepoint",
+      "type_expression": "S",
+      "types": [
+        "S"
+      ],
+      "stage_label": "MONTHLY",
+      "canonical_stage": "MODEL_MONTHLY",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Severity index increases without corresponding procedure, LOS or referral shift",
+      "requirements_raw": "Service-line expansion segmentation",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Service-line expansion segmentation",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Postpay audit",
+        "canonical_candidates_heuristic": [
+          "POSTPAY_AUDIT"
+        ],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "CLN-03",
+      "scenario_name": "Clinical incompatibility and specialty mismatch",
+      "priority_raw": "P1",
+      "rule_id": "CLN-03-R01",
+      "rule_name": "Impossible diagnosis–procedure pair",
+      "type_expression": "H",
+      "types": [
+        "H"
+      ],
+      "stage_label": "PREPAY",
+      "canonical_stage": "PREPAY_SYNC",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Pair explicitly prohibited by authoritative rule",
+      "requirements_raw": "Only rules marked `hard=true`",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Only rules marked `hard=true`",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Reject/pend",
+        "canonical_candidates_heuristic": [
+          "REJECT",
+          "PREPAY_PEND"
+        ],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "CLN-03",
+      "scenario_name": "Clinical incompatibility and specialty mismatch",
+      "priority_raw": "P1",
+      "rule_id": "CLN-03-R02",
+      "rule_name": "Unsupported indication",
+      "type_expression": "E",
+      "types": [
+        "E"
+      ],
+      "stage_label": "ASYNC",
+      "canonical_stage": "PREPAY_ASYNC",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "No same-episode or lookback indication in curated policy",
+      "requirements_raw": "Lookback and accepted indication groups",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Lookback and accepted indication groups",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Clinical review",
+        "canonical_candidates_heuristic": [],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "CLN-03",
+      "scenario_name": "Clinical incompatibility and specialty mismatch",
+      "priority_raw": "P1",
+      "rule_id": "CLN-03-R03",
+      "rule_name": "Procedure sequence conflict",
+      "type_expression": "E",
+      "types": [
+        "E"
+      ],
+      "stage_label": "DAILY",
+      "canonical_stage": "POSTPAY_DAILY",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Prerequisite procedure/result absent or service occurs in impossible order",
+      "requirements_raw": "External services and data latency",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "External services and data latency",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Pend/audit",
+        "canonical_candidates_heuristic": [
+          "PREPAY_PEND",
+          "POSTPAY_AUDIT"
+        ],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "CLN-03",
+      "scenario_name": "Clinical incompatibility and specialty mismatch",
+      "priority_raw": "P1",
+      "rule_id": "CLN-03-R04",
+      "rule_name": "Rare pair/specialty anomaly",
+      "type_expression": "S",
+      "types": [
+        "S"
+      ],
+      "stage_label": "MONTHLY",
+      "canonical_stage": "MODEL_MONTHLY",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Provider's rare combinations exceed specialty peer prevalence",
+      "requirements_raw": "Minimum volume; exploratory only",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Minimum volume; exploratory only",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Monitor/policy review",
+        "canonical_candidates_heuristic": [
+          "MONITOR_ONLY"
+        ],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "CLN-04",
+      "scenario_name": "Unnecessary, excessive or repeated services",
+      "priority_raw": "P0",
+      "rule_id": "CLN-04-R01",
+      "rule_name": "Minimum repeat interval",
+      "type_expression": "E",
+      "types": [
+        "E"
+      ],
+      "stage_label": "PREPAY",
+      "canonical_stage": "PREPAY_SYNC",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Same/equivalent service repeated inside policy interval without accepted indicator",
+      "requirements_raw": "Code family, clinical exception and required Observation",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Code family, clinical exception and required Observation",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Clinical pend",
+        "canonical_candidates_heuristic": [
+          "PREPAY_PEND"
+        ],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "CLN-04",
+      "scenario_name": "Unnecessary, excessive or repeated services",
+      "priority_raw": "P0",
+      "rule_id": "CLN-04-R02",
+      "rule_name": "Episode frequency excess",
+      "type_expression": "E/S",
+      "types": [
+        "E",
+        "S"
+      ],
+      "stage_label": "DAILY",
+      "canonical_stage": "POSTPAY_DAILY",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Count per episode/member exceeds policy maximum or risk-adjusted peer threshold",
+      "requirements_raw": "Diagnosis/care pathway and age",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Diagnosis/care pathway and age",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Pend/audit",
+        "canonical_candidates_heuristic": [
+          "PREPAY_PEND",
+          "POSTPAY_AUDIT"
+        ],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "CLN-04",
+      "scenario_name": "Unnecessary, excessive or repeated services",
+      "priority_raw": "P0",
+      "rule_id": "CLN-04-R03",
+      "rule_name": "No result before repeat",
+      "type_expression": "E",
+      "types": [
+        "E"
+      ],
+      "stage_label": "ASYNC",
+      "canonical_stage": "PREPAY_ASYNC",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Repeat diagnostic service occurs while prior result/report is absent or unchanged",
+      "requirements_raw": "Result latency, failed/inconclusive test",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Result latency, failed/inconclusive test",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Review",
+        "canonical_candidates_heuristic": [],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "CLN-04",
+      "scenario_name": "Unnecessary, excessive or repeated services",
+      "priority_raw": "P0",
+      "rule_id": "CLN-04-R04",
+      "rule_name": "Provider utilization outlier",
+      "type_expression": "S",
+      "types": [
+        "S"
+      ],
+      "stage_label": "MONTHLY",
+      "canonical_stage": "MODEL_MONTHLY",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Services per comparable episode/member exceed shrunk peers",
+      "requirements_raw": "Case mix, referral role and denominator",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Case mix, referral role and denominator",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Provider case",
+        "canonical_candidates_heuristic": [],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "CLN-04",
+      "scenario_name": "Unnecessary, excessive or repeated services",
+      "priority_raw": "P0",
+      "rule_id": "CLN-04-R05",
+      "rule_name": "Cascade pattern",
+      "type_expression": "S/N",
+      "types": [
+        "S",
+        "N"
+      ],
+      "stage_label": "WEEKLY",
+      "canonical_stage": "NETWORK_WEEKLY",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Initial low-intensity encounter reliably triggers unusually large downstream test/service bundle",
+      "requirements_raw": "Specialty pathway and network structure",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Specialty pathway and network structure",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Postpay/network case",
+        "canonical_candidates_heuristic": [
+          "POSTPAY_AUDIT"
+        ],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "CLN-05",
+      "scenario_name": "Length-of-stay, admission and readmission irregularity",
+      "priority_raw": "P1",
+      "rule_id": "CLN-05-R01",
+      "rule_name": "LOS high/low residual",
+      "type_expression": "S",
+      "types": [
+        "S"
+      ],
+      "stage_label": "DAILY",
+      "canonical_stage": "POSTPAY_DAILY",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "LOS outside risk-adjusted DRG/diagnosis prediction interval",
+      "requirements_raw": "Transfers, deaths, ICU and outlier payment",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Transfers, deaths, ICU and outlier payment",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Utilization review",
+        "canonical_candidates_heuristic": [],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "CLN-05",
+      "scenario_name": "Length-of-stay, admission and readmission irregularity",
+      "priority_raw": "P1",
+      "rule_id": "CLN-05-R02",
+      "rule_name": "Same/related readmission",
+      "type_expression": "E/S",
+      "types": [
+        "E",
+        "S"
+      ],
+      "stage_label": "DAILY",
+      "canonical_stage": "POSTPAY_DAILY",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Related admission inside `cfg.readmit_days` with payment impact",
+      "requirements_raw": "Planned/staged care, unrelated trauma",
+      "parameters_explicit": [
+        "readmit_days"
+      ],
+      "exclusions": {
+        "raw_combined_with_configuration": "Planned/staged care, unrelated trauma",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Episode review, not fraud label",
+        "canonical_candidates_heuristic": [],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "CLN-05",
+      "scenario_name": "Length-of-stay, admission and readmission irregularity",
+      "priority_raw": "P1",
+      "rule_id": "CLN-05-R03",
+      "rule_name": "Discharge-readmit split",
+      "type_expression": "H/E",
+      "types": [
+        "H",
+        "E"
+      ],
+      "stage_label": "DAILY",
+      "canonical_stage": "POSTPAY_DAILY",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Two stays likely constitute one continuous episode under payment policy",
+      "requirements_raw": "Transfers and genuine clinical deterioration",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Transfers and genuine clinical deterioration",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Reprice/pend",
+        "canonical_candidates_heuristic": [
+          "REPRICE",
+          "PREPAY_PEND"
+        ],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "CLN-05",
+      "scenario_name": "Length-of-stay, admission and readmission irregularity",
+      "priority_raw": "P1",
+      "rule_id": "CLN-05-R04",
+      "rule_name": "Admission-rate outlier",
+      "type_expression": "S",
+      "types": [
+        "S"
+      ],
+      "stage_label": "MONTHLY",
+      "canonical_stage": "MODEL_MONTHLY",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Provider admits unusually high share of comparable presentations",
+      "requirements_raw": "Severity, referral mix and observation status",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Severity, referral mix and observation status",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Postpay audit",
+        "canonical_candidates_heuristic": [
+          "POSTPAY_AUDIT"
+        ],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "CLN-06",
+      "scenario_name": "Phantom billing/service not rendered",
+      "priority_raw": "P0",
+      "rule_id": "CLN-06-R01",
+      "rule_name": "Missing expected order/result trail",
+      "type_expression": "E",
+      "types": [
+        "E"
+      ],
+      "stage_label": "ASYNC",
+      "canonical_stage": "PREPAY_ASYNC",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Billed diagnostic/therapy lacks required order, result, Observation or administration evidence",
+      "requirements_raw": "Artifact latency and service-specific requirements",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Artifact latency and service-specific requirements",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Pend",
+        "canonical_candidates_heuristic": [
+          "PREPAY_PEND"
+        ],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "CLN-06",
+      "scenario_name": "Phantom billing/service not rendered",
+      "priority_raw": "P0",
+      "rule_id": "CLN-06-R02",
+      "rule_name": "Closed/non-operational facility service",
+      "type_expression": "H/S",
+      "types": [
+        "H",
+        "S"
+      ],
+      "stage_label": "DAILY",
+      "canonical_stage": "POSTPAY_DAILY",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Service occurs outside verified operating period or facility shows no credible operating footprint",
+      "requirements_raw": "24-hour/emergency and outreach service",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "24-hour/emergency and outreach service",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "SIU lead",
+        "canonical_candidates_heuristic": [
+          "SIU_LEAD"
+        ],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "CLN-06",
+      "scenario_name": "Phantom billing/service not rendered",
+      "priority_raw": "P0",
+      "rule_id": "CLN-06-R03",
+      "rule_name": "Repeated synthetic encounter signature",
+      "type_expression": "S",
+      "types": [
+        "S"
+      ],
+      "stage_label": "DAILY",
+      "canonical_stage": "POSTPAY_DAILY",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "High rate of identical code/time/amount/note patterns across unrelated members",
+      "requirements_raw": "Standard packages and batch timestamps",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Standard packages and batch timestamps",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Provider case",
+        "canonical_candidates_heuristic": [],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "CLN-06",
+      "scenario_name": "Phantom billing/service not rendered",
+      "priority_raw": "P0",
+      "rule_id": "CLN-06-R04",
+      "rule_name": "Member denial/attendance mismatch",
+      "type_expression": "S",
+      "types": [
+        "S"
+      ],
+      "stage_label": "DAILY",
+      "canonical_stage": "POSTPAY_DAILY",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Reliable member confirmation or attendance record says service not received",
+      "requirements_raw": "Contact/authentication quality and recall",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Contact/authentication quality and recall",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "High-priority SIU lead",
+        "canonical_candidates_heuristic": [
+          "SIU_LEAD"
+        ],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "CLN-06",
+      "scenario_name": "Phantom billing/service not rendered",
+      "priority_raw": "P0",
+      "rule_id": "CLN-06-R05",
+      "rule_name": "No longitudinal clinical footprint",
+      "type_expression": "S",
+      "types": [
+        "S"
+      ],
+      "stage_label": "MONTHLY",
+      "canonical_stage": "MODEL_MONTHLY",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Claimed high-impact service lacks expected follow-up, medication, result or episode consequences versus peers",
+      "requirements_raw": "Out-of-network follow-up and data completeness",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Out-of-network follow-up and data completeness",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Supporting evidence only",
+        "canonical_candidates_heuristic": [],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "CLN-07",
+      "scenario_name": "Provider capacity and throughput impossibility",
+      "priority_raw": "P1",
+      "rule_id": "CLN-07-R01",
+      "rule_name": "Improbable service day",
+      "type_expression": "E/S",
+      "types": [
+        "E",
+        "S"
+      ],
+      "stage_label": "DAILY",
+      "canonical_stage": "POSTPAY_DAILY",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Sum of conservative service minutes/units per clinician exceeds available day capacity",
+      "requirements_raw": "Parallel/team services and documented hours",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Parallel/team services and documented hours",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Provider timeline",
+        "canonical_candidates_heuristic": [],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "CLN-07",
+      "scenario_name": "Provider capacity and throughput impossibility",
+      "priority_raw": "P1",
+      "rule_id": "CLN-07-R02",
+      "rule_name": "Facility/staff capacity",
+      "type_expression": "E/S",
+      "types": [
+        "E",
+        "S"
+      ],
+      "stage_label": "DAILY",
+      "canonical_stage": "POSTPAY_DAILY",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Claimed volume exceeds rooms/equipment/licensed staff capacity plus tolerance",
+      "requirements_raw": "Missing roster produces low confidence",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Missing roster produces low confidence",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Audit lead",
+        "canonical_candidates_heuristic": [
+          "POSTPAY_AUDIT"
+        ],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "CLN-07",
+      "scenario_name": "Provider capacity and throughput impossibility",
+      "priority_raw": "P1",
+      "rule_id": "CLN-07-R03",
+      "rule_name": "Scarce-equipment concurrency",
+      "type_expression": "E",
+      "types": [
+        "E"
+      ],
+      "stage_label": "DAILY",
+      "canonical_stage": "POSTPAY_DAILY",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Same device/resource required by overlapping services beyond capacity",
+      "requirements_raw": "Equipment inventory and turnaround",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Equipment inventory and turnaround",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Pend/audit",
+        "canonical_candidates_heuristic": [
+          "PREPAY_PEND",
+          "POSTPAY_AUDIT"
+        ],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "CLN-07",
+      "scenario_name": "Provider capacity and throughput impossibility",
+      "priority_raw": "P1",
+      "rule_id": "CLN-07-R04",
+      "rule_name": "Capacity trend discontinuity",
+      "type_expression": "S",
+      "types": [
+        "S"
+      ],
+      "stage_label": "MONTHLY",
+      "canonical_stage": "MODEL_MONTHLY",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Throughput jumps without staff, hours, equipment or facility change",
+      "requirements_raw": "Onboarding/data-feed changes",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Onboarding/data-feed changes",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Provider case",
+        "canonical_candidates_heuristic": [],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "CLN-08",
+      "scenario_name": "Laboratory, pathology and genetic-testing integrity",
+      "priority_raw": "P1",
+      "rule_id": "CLN-08-R01",
+      "rule_name": "No qualified order/relationship",
+      "type_expression": "E",
+      "types": [
+        "E"
+      ],
+      "stage_label": "PREPAY_ASYNC",
+      "canonical_stage": "PREPAY_ASYNC",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Test lacks valid ordering clinician or qualifying encounter/indication",
+      "requirements_raw": "Screening programs, standing orders",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Screening programs, standing orders",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Clinical pend",
+        "canonical_candidates_heuristic": [
+          "PREPAY_PEND"
+        ],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "CLN-08",
+      "scenario_name": "Laboratory, pathology and genetic-testing integrity",
+      "priority_raw": "P1",
+      "rule_id": "CLN-08-R02",
+      "rule_name": "Panel/component inflation",
+      "type_expression": "H/E",
+      "types": [
+        "H",
+        "E"
+      ],
+      "stage_label": "PREPAY",
+      "canonical_stage": "PREPAY_SYNC",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Components billed separately or panel substantially exceeds ordered tests",
+      "requirements_raw": "Reflex testing and local panel rules",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Reflex testing and local panel rules",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Reprice/pend",
+        "canonical_candidates_heuristic": [
+          "REPRICE",
+          "PREPAY_PEND"
+        ],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "CLN-08",
+      "scenario_name": "Laboratory, pathology and genetic-testing integrity",
+      "priority_raw": "P1",
+      "rule_id": "CLN-08-R03",
+      "rule_name": "Absent/duplicate result",
+      "type_expression": "E/T",
+      "types": [
+        "E",
+        "T"
+      ],
+      "stage_label": "ASYNC",
+      "canonical_stage": "PREPAY_ASYNC",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Paid test lacks result/report or identical result appears across unrelated patients",
+      "requirements_raw": "Result latency and normal templates",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Result latency and normal templates",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Audit/SIU lead",
+        "canonical_candidates_heuristic": [
+          "POSTPAY_AUDIT",
+          "SIU_LEAD"
+        ],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "CLN-08",
+      "scenario_name": "Laboratory, pathology and genetic-testing integrity",
+      "priority_raw": "P1",
+      "rule_id": "CLN-08-R04",
+      "rule_name": "Reference-lab/pass-through spread",
+      "type_expression": "S/N",
+      "types": [
+        "S",
+        "N"
+      ],
+      "stage_label": "MONTHLY",
+      "canonical_stage": "MODEL_MONTHLY",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Billing entity adds abnormal markup or volume while test is performed by concentrated third party",
+      "requirements_raw": "Contract and permitted reference arrangements",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Contract and permitted reference arrangements",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Postpay/network case",
+        "canonical_candidates_heuristic": [
+          "POSTPAY_AUDIT"
+        ],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "CLN-08",
+      "scenario_name": "Laboratory, pathology and genetic-testing integrity",
+      "priority_raw": "P1",
+      "rule_id": "CLN-08-R05",
+      "rule_name": "High-complexity/genetic test outlier",
+      "type_expression": "S",
+      "types": [
+        "S"
+      ],
+      "stage_label": "MONTHLY",
+      "canonical_stage": "MODEL_MONTHLY",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Provider ordering/rendering rate, panel size or cost exceeds risk-adjusted peers",
+      "requirements_raw": "Specialty/oncology/rare-disease centres",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Specialty/oncology/rare-disease centres",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Targeted record sample",
+        "canonical_candidates_heuristic": [],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "PHR-01",
+      "scenario_name": "Prescribed, authorized, billed and dispensed mismatch",
+      "priority_raw": "P0",
+      "rule_id": "PHR-01-R01",
+      "rule_name": "Product identity mismatch",
+      "type_expression": "H",
+      "types": [
+        "H"
+      ],
+      "stage_label": "PREPAY",
+      "canonical_stage": "PREPAY_SYNC",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Billed product differs from prescribed/authorized product and is not approved equivalent",
+      "requirements_raw": "Generic/trade equivalence and substitution policy",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Generic/trade equivalence and substitution policy",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Pend/reject",
+        "canonical_candidates_heuristic": [
+          "REJECT",
+          "PREPAY_PEND"
+        ],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "PHR-01",
+      "scenario_name": "Prescribed, authorized, billed and dispensed mismatch",
+      "priority_raw": "P0",
+      "rule_id": "PHR-01-R02",
+      "rule_name": "Quantity/strength/form mismatch",
+      "type_expression": "H/E",
+      "types": [
+        "H",
+        "E"
+      ],
+      "stage_label": "PREPAY",
+      "canonical_stage": "PREPAY_SYNC",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Billed quantity, strength or dosage form exceeds order/authorization",
+      "requirements_raw": "Partial fill, titration and package conversion",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Partial fill, titration and package conversion",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Reprice/pend",
+        "canonical_candidates_heuristic": [
+          "REPRICE",
+          "PREPAY_PEND"
+        ],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "PHR-01",
+      "scenario_name": "Prescribed, authorized, billed and dispensed mismatch",
+      "priority_raw": "P0",
+      "rule_id": "PHR-01-R03",
+      "rule_name": "Dispense-claim mismatch",
+      "type_expression": "H",
+      "types": [
+        "H"
+      ],
+      "stage_label": "DAILY",
+      "canonical_stage": "POSTPAY_DAILY",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Dispensing/inventory record differs from billed product/quantity",
+      "requirements_raw": "Claim timing and reversals",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Claim timing and reversals",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Pharmacy case",
+        "canonical_candidates_heuristic": [],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "PHR-01",
+      "scenario_name": "Prescribed, authorized, billed and dispensed mismatch",
+      "priority_raw": "P0",
+      "rule_id": "PHR-01-R04",
+      "rule_name": "Non-medical/uncovered substitution",
+      "type_expression": "E/S",
+      "types": [
+        "E",
+        "S"
+      ],
+      "stage_label": "DAILY",
+      "canonical_stage": "POSTPAY_DAILY",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Member/receipt/inventory evidence indicates uncovered or non-medical item supplied",
+      "requirements_raw": "Confirmation reliability",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Confirmation reliability",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "SIU lead",
+        "canonical_candidates_heuristic": [
+          "SIU_LEAD"
+        ],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "PHR-02",
+      "scenario_name": "Early refill, stockpiling and multi-prescriber convergence",
+      "priority_raw": "P0",
+      "rule_id": "PHR-02-R01",
+      "rule_name": "Refill overlap",
+      "type_expression": "H/E",
+      "types": [
+        "H",
+        "E"
+      ],
+      "stage_label": "PREPAY",
+      "canonical_stage": "PREPAY_SYNC",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Remaining supply at next fill exceeds `cfg.allowed_overlap_days`",
+      "requirements_raw": "Dose change, lost/travel override, inpatient days",
+      "parameters_explicit": [
+        "allowed_overlap_days"
+      ],
+      "exclusions": {
+        "raw_combined_with_configuration": "Dose change, lost/travel override, inpatient days",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Pend",
+        "canonical_candidates_heuristic": [
+          "PREPAY_PEND"
+        ],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "PHR-02",
+      "scenario_name": "Early refill, stockpiling and multi-prescriber convergence",
+      "priority_raw": "P0",
+      "rule_id": "PHR-02-R02",
+      "rule_name": "Therapy-duration excess",
+      "type_expression": "E",
+      "types": [
+        "E"
+      ],
+      "stage_label": "DAILY",
+      "canonical_stage": "POSTPAY_DAILY",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Continuous fills exceed diagnosis/drug policy duration without review",
+      "requirements_raw": "Chronic therapy and specialist approval",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Chronic therapy and specialist approval",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Clinical review",
+        "canonical_candidates_heuristic": [],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "PHR-02",
+      "scenario_name": "Early refill, stockpiling and multi-prescriber convergence",
+      "priority_raw": "P0",
+      "rule_id": "PHR-02-R03",
+      "rule_name": "Multi-prescriber same-equivalent drug",
+      "type_expression": "E/S",
+      "types": [
+        "E",
+        "S"
+      ],
+      "stage_label": "DAILY",
+      "canonical_stage": "POSTPAY_DAILY",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Distinct prescribers within window exceed drug/specialty threshold",
+      "requirements_raw": "Care team and provider-group identity",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Care team and provider-group identity",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Member/pharmacy case",
+        "canonical_candidates_heuristic": [],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "PHR-02",
+      "scenario_name": "Early refill, stockpiling and multi-prescriber convergence",
+      "priority_raw": "P0",
+      "rule_id": "PHR-02-R04",
+      "rule_name": "Multi-pharmacy convergence",
+      "type_expression": "S/N",
+      "types": [
+        "S",
+        "N"
+      ],
+      "stage_label": "DAILY",
+      "canonical_stage": "POSTPAY_DAILY",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Same member obtains overlapping equivalent drug from multiple pharmacies",
+      "requirements_raw": "Stock shortage and partial fills",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Stock shortage and partial fills",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "SIU/clinical lead",
+        "canonical_candidates_heuristic": [
+          "SIU_LEAD"
+        ],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "PHR-03",
+      "scenario_name": "High-cost drug/infusion/specialty-product spike",
+      "priority_raw": "P1",
+      "rule_id": "PHR-03-R01",
+      "rule_name": "Dose/weight/body-surface conflict",
+      "type_expression": "E",
+      "types": [
+        "E"
+      ],
+      "stage_label": "PREPAY",
+      "canonical_stage": "PREPAY_SYNC",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Claimed dose outside approved clinical range",
+      "requirements_raw": "Wastage, loading dose and rounding",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Wastage, loading dose and rounding",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Clinical pend/reprice",
+        "canonical_candidates_heuristic": [
+          "REPRICE",
+          "PREPAY_PEND"
+        ],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "PHR-03",
+      "scenario_name": "High-cost drug/infusion/specialty-product spike",
+      "priority_raw": "P1",
+      "rule_id": "PHR-03-R02",
+      "rule_name": "Drug-diagnosis/step-therapy conflict",
+      "type_expression": "E",
+      "types": [
+        "E"
+      ],
+      "stage_label": "PREPAY",
+      "canonical_stage": "PREPAY_SYNC",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Indication or prerequisite therapy absent",
+      "requirements_raw": "Authorization overrides and rare disease",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Authorization overrides and rare disease",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Pend",
+        "canonical_candidates_heuristic": [
+          "PREPAY_PEND"
+        ],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "PHR-03",
+      "scenario_name": "High-cost drug/infusion/specialty-product spike",
+      "priority_raw": "P1",
+      "rule_id": "PHR-03-R03",
+      "rule_name": "Provider/pharmacy volume spike",
+      "type_expression": "S",
+      "types": [
+        "S"
+      ],
+      "stage_label": "MONTHLY",
+      "canonical_stage": "MODEL_MONTHLY",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Risk-adjusted volume/value changepoint without patient-mix shift",
+      "requirements_raw": "New formulary/centre status",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "New formulary/centre status",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Audit",
+        "canonical_candidates_heuristic": [
+          "POSTPAY_AUDIT"
+        ],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "PHR-03",
+      "scenario_name": "High-cost drug/infusion/specialty-product spike",
+      "priority_raw": "P1",
+      "rule_id": "PHR-03-R04",
+      "rule_name": "Wastage/unused-vial anomaly",
+      "type_expression": "S",
+      "types": [
+        "S"
+      ],
+      "stage_label": "MONTHLY",
+      "canonical_stage": "MODEL_MONTHLY",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Wastage units or vial rounding exceed comparable dosing peers",
+      "requirements_raw": "Single-use vial policy",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Single-use vial policy",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Postpay sample",
+        "canonical_candidates_heuristic": [
+          "POSTPAY_AUDIT"
+        ],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "PHR-04",
+      "scenario_name": "Prescriber–pharmacy steering and reciprocal concentration",
+      "priority_raw": "P1",
+      "rule_id": "PHR-04-R01",
+      "rule_name": "Top-pharmacy concentration",
+      "type_expression": "S",
+      "types": [
+        "S"
+      ],
+      "stage_label": "MONTHLY",
+      "canonical_stage": "MODEL_MONTHLY",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Prescriber's share to top pharmacy exceeds geographic/specialty peers",
+      "requirements_raw": "On-site, specialty and narrow network",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "On-site, specialty and narrow network",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Network lead",
+        "canonical_candidates_heuristic": [],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "PHR-04",
+      "scenario_name": "Prescriber–pharmacy steering and reciprocal concentration",
+      "priority_raw": "P1",
+      "rule_id": "PHR-04-R02",
+      "rule_name": "Reciprocal value loop",
+      "type_expression": "N",
+      "types": [
+        "N"
+      ],
+      "stage_label": "WEEKLY",
+      "canonical_stage": "NETWORK_WEEKLY",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Concentrated prescriber→pharmacy flow aligns with referrals/ownership/shared IDs",
+      "requirements_raw": "Known corporate relationships",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Known corporate relationships",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "SIU graph",
+        "canonical_candidates_heuristic": [
+          "SIU_LEAD"
+        ],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "PHR-04",
+      "scenario_name": "Prescriber–pharmacy steering and reciprocal concentration",
+      "priority_raw": "P1",
+      "rule_id": "PHR-04-R03",
+      "rule_name": "High-cost steering",
+      "type_expression": "S/N",
+      "types": [
+        "S",
+        "N"
+      ],
+      "stage_label": "WEEKLY",
+      "canonical_stage": "NETWORK_WEEKLY",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Concentration is materially stronger for profitable/high-cost drugs",
+      "requirements_raw": "Product availability",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Product availability",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Prioritized lead",
+        "canonical_candidates_heuristic": [],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "PHR-04",
+      "scenario_name": "Prescriber–pharmacy steering and reciprocal concentration",
+      "priority_raw": "P1",
+      "rule_id": "PHR-04-R04",
+      "rule_name": "Rapid relationship formation",
+      "type_expression": "N",
+      "types": [
+        "N"
+      ],
+      "stage_label": "WEEKLY",
+      "canonical_stage": "NETWORK_WEEKLY",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "New prescriber-pharmacy edge rapidly becomes dominant",
+      "requirements_raw": "New site/contract launch",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "New site/contract launch",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Monitor/SIU",
+        "canonical_candidates_heuristic": [
+          "SIU_LEAD",
+          "MONITOR_ONLY"
+        ],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "PHR-05",
+      "scenario_name": "Equipment, implant, consumable and supply integrity",
+      "priority_raw": "P1",
+      "rule_id": "PHR-05-R01",
+      "rule_name": "New/used/rental/purchase mismatch",
+      "type_expression": "H/E",
+      "types": [
+        "H",
+        "E"
+      ],
+      "stage_label": "PREPAY",
+      "canonical_stage": "PREPAY_SYNC",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Billed condition or payment method conflicts with authorization, serial/inventory or contract",
+      "requirements_raw": "Refurbishment and rent-to-own policy",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Refurbishment and rent-to-own policy",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Reprice/pend",
+        "canonical_candidates_heuristic": [
+          "REPRICE",
+          "PREPAY_PEND"
+        ],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "PHR-05",
+      "scenario_name": "Equipment, implant, consumable and supply integrity",
+      "priority_raw": "P1",
+      "rule_id": "PHR-05-R02",
+      "rule_name": "Implant/device not linked to procedure",
+      "type_expression": "E",
+      "types": [
+        "E"
+      ],
+      "stage_label": "PREPAY",
+      "canonical_stage": "PREPAY_SYNC",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Device/implant lacks qualifying procedure, laterality or operative record",
+      "requirements_raw": "Replacement/spare policy",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Replacement/spare policy",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Clinical pend",
+        "canonical_candidates_heuristic": [
+          "PREPAY_PEND"
+        ],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "PHR-05",
+      "scenario_name": "Equipment, implant, consumable and supply integrity",
+      "priority_raw": "P1",
+      "rule_id": "PHR-05-R03",
+      "rule_name": "Supply quantity/consumption excess",
+      "type_expression": "E/S",
+      "types": [
+        "E",
+        "S"
+      ],
+      "stage_label": "DAILY",
+      "canonical_stage": "POSTPAY_DAILY",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Units exceed procedure/episode norm or repeat too soon for useful life",
+      "requirements_raw": "Member growth/damage/clinical change",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Member growth/damage/clinical change",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Reprice/audit",
+        "canonical_candidates_heuristic": [
+          "REPRICE",
+          "POSTPAY_AUDIT"
+        ],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "PHR-05",
+      "scenario_name": "Equipment, implant, consumable and supply integrity",
+      "priority_raw": "P1",
+      "rule_id": "PHR-05-R04",
+      "rule_name": "Serial/inventory duplication",
+      "type_expression": "H/N",
+      "types": [
+        "H",
+        "N"
+      ],
+      "stage_label": "DAILY",
+      "canonical_stage": "POSTPAY_DAILY",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Same serial/batch billed for multiple members or claimed stock exceeds inventory/acquisition",
+      "requirements_raw": "Bulk/non-serialized consumables",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Bulk/non-serialized consumables",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "SIU lead",
+        "canonical_candidates_heuristic": [
+          "SIU_LEAD"
+        ],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "DOC-01",
+      "scenario_name": "Documentation-to-billing/authorization inconsistency",
+      "priority_raw": "P1",
+      "rule_id": "DOC-01-R01",
+      "rule_name": "Required document absent",
+      "type_expression": "H/E",
+      "types": [
+        "H",
+        "E"
+      ],
+      "stage_label": "ASYNC",
+      "canonical_stage": "PREPAY_ASYNC",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Rule requires note/report/consent/Observation and it is missing after SLA",
+      "requirements_raw": "Document type and latency",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Document type and latency",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Pend",
+        "canonical_candidates_heuristic": [
+          "PREPAY_PEND"
+        ],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "DOC-01",
+      "scenario_name": "Documentation-to-billing/authorization inconsistency",
+      "priority_raw": "P1",
+      "rule_id": "DOC-01-R02",
+      "rule_name": "Structured fact conflict",
+      "type_expression": "T/E",
+      "types": [
+        "T",
+        "E"
+      ],
+      "stage_label": "ASYNC",
+      "canonical_stage": "PREPAY_ASYNC",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Extracted diagnosis, procedure, date, quantity or setting contradicts claim/authorization",
+      "requirements_raw": "Per-field extraction precision threshold",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Per-field extraction precision threshold",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Human review",
+        "canonical_candidates_heuristic": [],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "DOC-01",
+      "scenario_name": "Documentation-to-billing/authorization inconsistency",
+      "priority_raw": "P1",
+      "rule_id": "DOC-01-R03",
+      "rule_name": "Medical-necessity support absent",
+      "type_expression": "T/E",
+      "types": [
+        "T",
+        "E"
+      ],
+      "stage_label": "ASYNC",
+      "canonical_stage": "PREPAY_ASYNC",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Required indication/severity element cannot be found",
+      "requirements_raw": "Absence is not proof; use qualified reviewer",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Absence is not proof; use qualified reviewer",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Clinical review",
+        "canonical_candidates_heuristic": [],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "DOC-01",
+      "scenario_name": "Documentation-to-billing/authorization inconsistency",
+      "priority_raw": "P1",
+      "rule_id": "DOC-01-R04",
+      "rule_name": "Authorization narrative drift",
+      "type_expression": "T",
+      "types": [
+        "T"
+      ],
+      "stage_label": "ASYNC",
+      "canonical_stage": "PREPAY_ASYNC",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Material semantic/entity mismatch between request narrative and billed event",
+      "requirements_raw": "Explain with extracted conflicting facts",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Explain with extracted conflicting facts",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Pend",
+        "canonical_candidates_heuristic": [
+          "PREPAY_PEND"
+        ],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "DOC-02",
+      "scenario_name": "Cloned, templated or retrospectively altered documentation",
+      "priority_raw": "P2",
+      "rule_id": "DOC-02-R01",
+      "rule_name": "Cross-patient near duplicate",
+      "type_expression": "T",
+      "types": [
+        "T"
+      ],
+      "stage_label": "DAILY",
+      "canonical_stage": "POSTPAY_DAILY",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Patient-specific content similarity exceeds threshold across unrelated members",
+      "requirements_raw": "Remove standard boilerplate before comparison",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Remove standard boilerplate before comparison",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Audit sample",
+        "canonical_candidates_heuristic": [
+          "POSTPAY_AUDIT"
+        ],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "DOC-02",
+      "scenario_name": "Cloned, templated or retrospectively altered documentation",
+      "priority_raw": "P2",
+      "rule_id": "DOC-02-R02",
+      "rule_name": "Contradictory copied facts",
+      "type_expression": "T/E",
+      "types": [
+        "T",
+        "E"
+      ],
+      "stage_label": "DAILY",
+      "canonical_stage": "POSTPAY_DAILY",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Note contains wrong patient demographics/date/laterality or impossible copied findings",
+      "requirements_raw": "Extraction confidence",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Extraction confidence",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "High-priority review",
+        "canonical_candidates_heuristic": [],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "DOC-02",
+      "scenario_name": "Cloned, templated or retrospectively altered documentation",
+      "priority_raw": "P2",
+      "rule_id": "DOC-02-R03",
+      "rule_name": "Post-denial material alteration",
+      "type_expression": "H/T",
+      "types": [
+        "H",
+        "T"
+      ],
+      "stage_label": "DAILY",
+      "canonical_stage": "POSTPAY_DAILY",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Document version changes reimbursement-relevant facts after denial without addendum provenance",
+      "requirements_raw": "Valid signed addendum policy",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Valid signed addendum policy",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "PAY-08-linked case",
+        "canonical_candidates_heuristic": [],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "DOC-02",
+      "scenario_name": "Cloned, templated or retrospectively altered documentation",
+      "priority_raw": "P2",
+      "rule_id": "DOC-02-R04",
+      "rule_name": "Template-to-complexity mismatch",
+      "type_expression": "T/S",
+      "types": [
+        "T",
+        "S"
+      ],
+      "stage_label": "MONTHLY",
+      "canonical_stage": "MODEL_MONTHLY",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "High-complexity services supported by unusually generic notes versus peers",
+      "requirements_raw": "Specialty and EHR template",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Specialty and EHR template",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Supporting evidence only",
+        "canonical_candidates_heuristic": [],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "NET-01",
+      "scenario_name": "Referral concentration, reciprocity and downstream conversion",
+      "priority_raw": "P1",
+      "rule_id": "NET-01-R01",
+      "rule_name": "Referral concentration outlier",
+      "type_expression": "S",
+      "types": [
+        "S"
+      ],
+      "stage_label": "MONTHLY",
+      "canonical_stage": "MODEL_MONTHLY",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Top-recipient share/HHI exceeds specialty/geographic peers",
+      "requirements_raw": "Group/network and centre-of-excellence",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Group/network and centre-of-excellence",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Network case",
+        "canonical_candidates_heuristic": [],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "NET-01",
+      "scenario_name": "Referral concentration, reciprocity and downstream conversion",
+      "priority_raw": "P1",
+      "rule_id": "NET-01-R02",
+      "rule_name": "Reciprocal referral loop",
+      "type_expression": "N",
+      "types": [
+        "N"
+      ],
+      "stage_label": "WEEKLY",
+      "canonical_stage": "NETWORK_WEEKLY",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "A→B and B→A edges are unusually strong relative to opportunity",
+      "requirements_raw": "Multidisciplinary teams",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Multidisciplinary teams",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Graph evidence",
+        "canonical_candidates_heuristic": [],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "NET-01",
+      "scenario_name": "Referral concentration, reciprocity and downstream conversion",
+      "priority_raw": "P1",
+      "rule_id": "NET-01-R03",
+      "rule_name": "High-cost conversion",
+      "type_expression": "S/N",
+      "types": [
+        "S",
+        "N"
+      ],
+      "stage_label": "WEEKLY",
+      "canonical_stage": "NETWORK_WEEKLY",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Referred members convert to high-cost service at abnormal rate/value",
+      "requirements_raw": "Case mix and referral indication",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Case mix and referral indication",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Prioritized audit",
+        "canonical_candidates_heuristic": [
+          "POSTPAY_AUDIT"
+        ],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "NET-01",
+      "scenario_name": "Referral concentration, reciprocity and downstream conversion",
+      "priority_raw": "P1",
+      "rule_id": "NET-01-R04",
+      "rule_name": "Closed downstream chain",
+      "type_expression": "N",
+      "types": [
+        "N"
+      ],
+      "stage_label": "WEEKLY",
+      "canonical_stage": "NETWORK_WEEKLY",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Referrer→lab/imaging/pharmacy chain retains members within small dense group",
+      "requirements_raw": "Ownership/narrow network",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Ownership/narrow network",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "SIU lead",
+        "canonical_candidates_heuristic": [
+          "SIU_LEAD"
+        ],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "NET-02",
+      "scenario_name": "Collusion ring and shared-identifier linkage",
+      "priority_raw": "P1",
+      "rule_id": "NET-02-R01",
+      "rule_name": "Shared administrative identity",
+      "type_expression": "H/N",
+      "types": [
+        "H",
+        "N"
+      ],
+      "stage_label": "DAILY",
+      "canonical_stage": "POSTPAY_DAILY",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Legally distinct entities share bank, phone, address, device or owner identifier",
+      "requirements_raw": "Known groups/shared services; fuzzy matches cannot be hard flags",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Known groups/shared services; fuzzy matches cannot be hard flags",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Graph edge",
+        "canonical_candidates_heuristic": [],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "NET-02",
+      "scenario_name": "Collusion ring and shared-identifier linkage",
+      "priority_raw": "P1",
+      "rule_id": "NET-02-R02",
+      "rule_name": "Dense member circulation",
+      "type_expression": "N",
+      "types": [
+        "N"
+      ],
+      "stage_label": "WEEKLY",
+      "canonical_stage": "NETWORK_WEEKLY",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Community has abnormal internal member/provider edge density and low external flow",
+      "requirements_raw": "Specialty/geography/size matched communities",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Specialty/geography/size matched communities",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "SIU graph",
+        "canonical_candidates_heuristic": [
+          "SIU_LEAD"
+        ],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "NET-02",
+      "scenario_name": "Collusion ring and shared-identifier linkage",
+      "priority_raw": "P1",
+      "rule_id": "NET-02-R03",
+      "rule_name": "Synchronized billing",
+      "type_expression": "N/S",
+      "types": [
+        "N",
+        "S"
+      ],
+      "stage_label": "DAILY",
+      "canonical_stage": "POSTPAY_DAILY",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Community claims share unusual time, amount, code or resubmission signatures",
+      "requirements_raw": "Batch billing systems",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Batch billing systems",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Supporting evidence",
+        "canonical_candidates_heuristic": [],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "NET-02",
+      "scenario_name": "Collusion ring and shared-identifier linkage",
+      "priority_raw": "P1",
+      "rule_id": "NET-02-R04",
+      "rule_name": "Structural-change alert",
+      "type_expression": "N",
+      "types": [
+        "N"
+      ],
+      "stage_label": "WEEKLY",
+      "canonical_stage": "NETWORK_WEEKLY",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Previously peripheral nodes rapidly become central/dense with material exposure",
+      "requirements_raw": "Merger/new contract",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Merger/new contract",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Monitor/SIU",
+        "canonical_candidates_heuristic": [
+          "SIU_LEAD",
+          "MONITOR_ONLY"
+        ],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "NET-03",
+      "scenario_name": "Provider–member collusion and inducement",
+      "priority_raw": "P1",
+      "rule_id": "NET-03-R01",
+      "rule_name": "Repeated high-value dyad",
+      "type_expression": "S/N",
+      "types": [
+        "S",
+        "N"
+      ],
+      "stage_label": "MONTHLY",
+      "canonical_stage": "MODEL_MONTHLY",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Member-provider pair has abnormal frequency/value and benefit exhaustion",
+      "requirements_raw": "Chronic/rare-disease pathways",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Chronic/rare-disease pathways",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Case evidence",
+        "canonical_candidates_heuristic": [],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "NET-03",
+      "scenario_name": "Provider–member collusion and inducement",
+      "priority_raw": "P1",
+      "rule_id": "NET-03-R02",
+      "rule_name": "Small closed member group",
+      "type_expression": "N",
+      "types": [
+        "N"
+      ],
+      "stage_label": "WEEKLY",
+      "canonical_stage": "NETWORK_WEEKLY",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Provider activity concentrates in tightly connected member/employer group",
+      "requirements_raw": "Clinic catchment and employer onsite care",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Clinic catchment and employer onsite care",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "SIU graph",
+        "canonical_candidates_heuristic": [
+          "SIU_LEAD"
+        ],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "NET-03",
+      "scenario_name": "Provider–member collusion and inducement",
+      "priority_raw": "P1",
+      "rule_id": "NET-03-R03",
+      "rule_name": "Inducement signature",
+      "type_expression": "S",
+      "types": [
+        "S"
+      ],
+      "stage_label": "MONTHLY",
+      "canonical_stage": "MODEL_MONTHLY",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Zero patient share, non-medical substitution or repetitive profitable services co-occur",
+      "requirements_raw": "Approved programs",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Approved programs",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "High-priority lead",
+        "canonical_candidates_heuristic": [],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "NET-03",
+      "scenario_name": "Provider–member collusion and inducement",
+      "priority_raw": "P1",
+      "rule_id": "NET-03-R04",
+      "rule_name": "Complaint/confirmation corroboration",
+      "type_expression": "S",
+      "types": [
+        "S"
+      ],
+      "stage_label": "DAILY",
+      "canonical_stage": "POSTPAY_DAILY",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Authenticated member evidence corroborates service/item or charge mismatch",
+      "requirements_raw": "Evidence reliability",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Evidence reliability",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Escalate case",
+        "canonical_candidates_heuristic": [],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "NET-04",
+      "scenario_name": "Broker, agent and employer-group concentration",
+      "priority_raw": "P2",
+      "rule_id": "NET-04-R01",
+      "rule_name": "Confirmed-outcome rate",
+      "type_expression": "S",
+      "types": [
+        "S"
+      ],
+      "stage_label": "MONTHLY",
+      "canonical_stage": "MODEL_MONTHLY",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Hierarchical model shows excess validated FWA/error outcomes by originator/group",
+      "requirements_raw": "Never use raw system flags as label; control portfolio mix",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Never use raw system flags as label; control portfolio mix",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Distribution review",
+        "canonical_candidates_heuristic": [],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "NET-04",
+      "scenario_name": "Broker, agent and employer-group concentration",
+      "priority_raw": "P2",
+      "rule_id": "NET-04-R02",
+      "rule_name": "Provider concentration",
+      "type_expression": "S/N",
+      "types": [
+        "S",
+        "N"
+      ],
+      "stage_label": "MONTHLY",
+      "canonical_stage": "MODEL_MONTHLY",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Originator/group members disproportionately use a small provider network",
+      "requirements_raw": "Employer clinic and geography",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Employer clinic and geography",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Network case",
+        "canonical_candidates_heuristic": [],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "NET-04",
+      "scenario_name": "Broker, agent and employer-group concentration",
+      "priority_raw": "P2",
+      "rule_id": "NET-04-R03",
+      "rule_name": "Early-tenure high-risk cluster",
+      "type_expression": "S",
+      "types": [
+        "S"
+      ],
+      "stage_label": "MONTHLY",
+      "canonical_stage": "MODEL_MONTHLY",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "High-cost claims shortly after enrollment cluster by originator/group beyond morbidity expectation",
+      "requirements_raw": "Maternity/chronic continuity and guaranteed issue",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Maternity/chronic continuity and guaranteed issue",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Review, never individual denial",
+        "canonical_candidates_heuristic": [
+          "REJECT"
+        ],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "NET-04",
+      "scenario_name": "Broker, agent and employer-group concentration",
+      "priority_raw": "P2",
+      "rule_id": "NET-04-R04",
+      "rule_name": "Shared identifiers/actors",
+      "type_expression": "N",
+      "types": [
+        "N"
+      ],
+      "stage_label": "WEEKLY",
+      "canonical_stage": "NETWORK_WEEKLY",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Broker, employer, member and provider share suspicious contact/payment/device links",
+      "requirements_raw": "Lawful data and known corporate links",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Lawful data and known corporate links",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "SIU graph",
+        "canonical_candidates_heuristic": [
+          "SIU_LEAD"
+        ],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "ANL-01",
+      "scenario_name": "Multivariate anomaly and behavioral change",
+      "priority_raw": "P1",
+      "rule_id": "ANL-01-R01",
+      "rule_name": "Robust peer composite",
+      "type_expression": "S",
+      "types": [
+        "S"
+      ],
+      "stage_label": "MONTHLY",
+      "canonical_stage": "MODEL_MONTHLY",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Weighted robust residuals across scenario-aligned features exceed calibrated threshold",
+      "requirements_raw": "Specialty/setting/size peer hierarchy",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Specialty/setting/size peer hierarchy",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Explainable entity lead",
+        "canonical_candidates_heuristic": [],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "ANL-01",
+      "scenario_name": "Multivariate anomaly and behavioral change",
+      "priority_raw": "P1",
+      "rule_id": "ANL-01-R02",
+      "rule_name": "Self-history changepoint",
+      "type_expression": "S",
+      "types": [
+        "S"
+      ],
+      "stage_label": "MONTHLY",
+      "canonical_stage": "MODEL_MONTHLY",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "CUSUM/Bayesian changepoint on value, mix, frequency or denial behavior",
+      "requirements_raw": "Segment tariff/contract/ownership changes",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Segment tariff/contract/ownership changes",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Entity lead",
+        "canonical_candidates_heuristic": [],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "ANL-01",
+      "scenario_name": "Multivariate anomaly and behavioral change",
+      "priority_raw": "P1",
+      "rule_id": "ANL-01-R03",
+      "rule_name": "Unsupervised incremental anomaly",
+      "type_expression": "M",
+      "types": [
+        "M"
+      ],
+      "stage_label": "MONTHLY",
+      "canonical_stage": "MODEL_MONTHLY",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Benchmarked model flags entity and adds lift beyond R01/R02",
+      "requirements_raw": "Temporal validation, feature attribution, drift",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Temporal validation, feature attribution, drift",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Monitor/SIU only",
+        "canonical_candidates_heuristic": [
+          "SIU_LEAD",
+          "MONITOR_ONLY"
+        ],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "ANL-01",
+      "scenario_name": "Multivariate anomaly and behavioral change",
+      "priority_raw": "P1",
+      "rule_id": "ANL-01-R04",
+      "rule_name": "Novel-cluster discovery",
+      "type_expression": "M",
+      "types": [
+        "M"
+      ],
+      "stage_label": "QUARTERLY",
+      "canonical_stage": null,
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Analyst-reviewed cluster exhibits coherent new typology and material exposure",
+      "requirements_raw": "Exploratory; no production action until converted to rule",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Exploratory; no production action until converted to rule",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Rule-development candidate",
+        "canonical_candidates_heuristic": [],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "POL-01",
+      "scenario_name": "Enrollment, employer-group and policy manipulation",
+      "priority_raw": "P1",
+      "rule_id": "POL-01-R01",
+      "rule_name": "Eligibility/roster conflict",
+      "type_expression": "H",
+      "types": [
+        "H"
+      ],
+      "stage_label": "DAILY",
+      "canonical_stage": "POSTPAY_DAILY",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Enrolled member lacks valid sponsor/employment/dependent relationship or duplicate active identity exists",
+      "requirements_raw": "Continuation, newborn and mandated coverage",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Continuation, newborn and mandated coverage",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Enrollment pend",
+        "canonical_candidates_heuristic": [
+          "PREPAY_PEND"
+        ],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "POL-01",
+      "scenario_name": "Enrollment, employer-group and policy manipulation",
+      "priority_raw": "P1",
+      "rule_id": "POL-01-R02",
+      "rule_name": "Retroactive event after service",
+      "type_expression": "H/S",
+      "types": [
+        "H",
+        "S"
+      ],
+      "stage_label": "DAILY",
+      "canonical_stage": "POSTPAY_DAILY",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Member add/change occurs after high-cost service with actor/time pattern outside policy",
+      "requirements_raw": "Approved retroactive correction/SLA",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Approved retroactive correction/SLA",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Underwriting/compliance review",
+        "canonical_candidates_heuristic": [],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "POL-01",
+      "scenario_name": "Enrollment, employer-group and policy manipulation",
+      "priority_raw": "P1",
+      "rule_id": "POL-01-R03",
+      "rule_name": "Application/claim fact conflict",
+      "type_expression": "E",
+      "types": [
+        "E"
+      ],
+      "stage_label": "DAILY",
+      "canonical_stage": "POSTPAY_DAILY",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Material application declaration conflicts with authoritative prior coverage/claim history where legally usable",
+      "requirements_raw": "Contestability, non-discrimination and privacy law",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Contestability, non-discrimination and privacy law",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Human review only",
+        "canonical_candidates_heuristic": [],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "POL-01",
+      "scenario_name": "Enrollment, employer-group and policy manipulation",
+      "priority_raw": "P1",
+      "rule_id": "POL-01-R04",
+      "rule_name": "Early-tenure utilization anomaly",
+      "type_expression": "S",
+      "types": [
+        "S"
+      ],
+      "stage_label": "MONTHLY",
+      "canonical_stage": "MODEL_MONTHLY",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Claim pattern shortly after inception exceeds tenure/risk-adjusted expectation",
+      "requirements_raw": "Not evidence of fraud alone; maternity/chronic continuity",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Not evidence of fraud alone; maternity/chronic continuity",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "Monitor/distribution signal",
+        "canonical_candidates_heuristic": [
+          "MONITOR_ONLY"
+        ],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    },
+    {
+      "scenario_id": "POL-01",
+      "scenario_name": "Enrollment, employer-group and policy manipulation",
+      "priority_raw": "P1",
+      "rule_id": "POL-01-R05",
+      "rule_name": "Employer/broker enrollment cluster",
+      "type_expression": "S/N",
+      "types": [
+        "S",
+        "N"
+      ],
+      "stage_label": "MONTHLY",
+      "canonical_stage": "MODEL_MONTHLY",
+      "population": null,
+      "inputs": null,
+      "trigger_semantics_raw": "Suspicious member additions, identity links or early claims cluster by employer/originator",
+      "requirements_raw": "Portfolio size and enrollment campaign",
+      "parameters_explicit": [],
+      "exclusions": {
+        "raw_combined_with_configuration": "Portfolio size and enrollment campaign",
+        "machine_separated": false
+      },
+      "disposition": {
+        "raw": "NET-04-linked case",
+        "canonical_candidates_heuristic": [],
+        "resolution_required": true
+      },
+      "reason_code": null,
+      "evidence_fields": null
+    }
+  ]
+}

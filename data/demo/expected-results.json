@@ -1,0 +1,11 @@
+{
+  "DEMO-FLAG-001": [
+    "ENT-01-R01",
+    "PAY-01-R01",
+    "CLN-04-R01",
+    "NET-01-R01"
+  ],
+  "DEMO-CLEAN-001": [],
+  "DEMO-PARTIAL-001": [],
+  "notes": "No excluded or deferred control is expected to trigger."
+}
