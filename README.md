@@ -2,7 +2,7 @@
 
 Local, browser-based decision support for tokenized UAE medical claims. The app shows `Flagged` or `No flag detected` together with `Complete` or `Partial` evaluation coverage; it never labels a person or claim as fraudulent.
 
-> Current release status: see `IMPLEMENTATION_STATUS.md`. The catalogue source does not define executable field-level policy for most controls, so the current evaluator consumes explicit structured boolean facts keyed by rule ID. It must not be used as a payment-policy implementation until the unresolved contracts in `docs/DECISIONS.md` are approved.
+> Current release status: see `IMPLEMENTATION_STATUS.md`. The evaluator uses canonical facts, governed references, explicit exclusions, and versioned configuration; caller-supplied rule booleans and synthetic labels are discarded. Local defaults remain engineering assumptions rather than approved payer policy.
 
 ## Prerequisites and first run
 

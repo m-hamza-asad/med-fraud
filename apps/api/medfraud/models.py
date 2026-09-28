@@ -3,7 +3,7 @@ from __future__ import annotations
 from datetime import date, datetime
 from decimal import Decimal
 
-from sqlalchemy import Boolean, Date, DateTime, ForeignKey, Index, Integer, Numeric, String, Text
+from sqlalchemy import Boolean, Date, DateTime, ForeignKey, Index, Integer, Numeric, String, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column
 
 from .database import Base
@@ -175,3 +175,214 @@ class AuditEvent(Base):
     detail_json: Mapped[str] = mapped_column(Text, default="{}")
     created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow, index=True)
 
+
+class SchemaMigration(Base):
+    __tablename__ = "schema_migrations"
+    version: Mapped[str] = mapped_column(String(32), primary_key=True)
+    description: Mapped[str] = mapped_column(String(255))
+    applied_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+
+
+class DatasetProfile(Base):
+    __tablename__ = "dataset_profiles"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    import_batch_id: Mapped[int | None] = mapped_column(ForeignKey("import_batches.id"), index=True)
+    dataset_name: Mapped[str] = mapped_column(String(128), index=True)
+    snapshot_hash: Mapped[str] = mapped_column(String(64), index=True)
+    source_profile: Mapped[str] = mapped_column(String(32), index=True)
+    safety_status: Mapped[str] = mapped_column(String(32), index=True)
+    mapping_status: Mapped[str] = mapped_column(String(32), index=True)
+    row_count: Mapped[int] = mapped_column(Integer, default=0)
+    period_start: Mapped[date | None] = mapped_column(Date)
+    period_end: Mapped[date | None] = mapped_column(Date)
+    summary_json: Mapped[str] = mapped_column(Text, default="{}")
+    limitations_json: Mapped[str] = mapped_column(Text, default="[]")
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+
+
+class MappingProfile(Base):
+    __tablename__ = "mapping_profiles"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str] = mapped_column(String(128), unique=True)
+    source_profile: Mapped[str] = mapped_column(String(32), index=True)
+    schema_hash: Mapped[str] = mapped_column(String(64), index=True)
+    mapping_json: Mapped[str] = mapped_column(Text)
+    confirmed: Mapped[bool] = mapped_column(Boolean, default=False)
+    created_by: Mapped[int | None] = mapped_column(ForeignKey("users.id"))
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+
+
+class ImportPreview(Base):
+    __tablename__ = "import_previews"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    batch_id: Mapped[int] = mapped_column(ForeignKey("import_batches.id", ondelete="CASCADE"), unique=True)
+    analysis_date: Mapped[date] = mapped_column(Date)
+    normalized_rows_json: Mapped[str] = mapped_column(Text)
+    mapping_profile_id: Mapped[int | None] = mapped_column(ForeignKey("mapping_profiles.id"))
+    expires_at: Mapped[datetime | None] = mapped_column(DateTime)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+
+
+class CanonicalProvider(Base):
+    __tablename__ = "canonical_providers"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    provider_token: Mapped[str] = mapped_column(String(128), unique=True, index=True)
+    provider_type: Mapped[str | None] = mapped_column(String(64), index=True)
+    specialty: Mapped[str | None] = mapped_column(String(128), index=True)
+    facility_token: Mapped[str | None] = mapped_column(String(128), index=True)
+    geography: Mapped[str | None] = mapped_column(String(128), index=True)
+    ownership_group: Mapped[str | None] = mapped_column(String(128), index=True)
+    valid_from: Mapped[date | None] = mapped_column(Date)
+    valid_to: Mapped[date | None] = mapped_column(Date)
+    source: Mapped[str] = mapped_column(String(128), default="upload")
+    version_id: Mapped[str] = mapped_column(String(64), default="v1")
+    attributes_json: Mapped[str] = mapped_column(Text, default="{}")
+
+
+class CanonicalFact(Base):
+    __tablename__ = "canonical_facts"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    claim_id: Mapped[int | None] = mapped_column(ForeignKey("claims.id", ondelete="CASCADE"), index=True)
+    claim_line_id: Mapped[int | None] = mapped_column(ForeignKey("claim_lines.id", ondelete="CASCADE"), index=True)
+    entity_type: Mapped[str] = mapped_column(String(64), index=True)
+    entity_key: Mapped[str] = mapped_column(String(128), index=True)
+    dataset: Mapped[str] = mapped_column(String(64), index=True)
+    field_name: Mapped[str] = mapped_column(String(128), index=True)
+    value_type: Mapped[str] = mapped_column(String(16))
+    value_text: Mapped[str | None] = mapped_column(Text)
+    value_number: Mapped[Decimal | None] = mapped_column(Numeric(24, 6))
+    value_date: Mapped[date | None] = mapped_column(Date)
+    value_bool: Mapped[bool | None] = mapped_column(Boolean)
+    valid_from: Mapped[date | None] = mapped_column(Date, index=True)
+    valid_to: Mapped[date | None] = mapped_column(Date, index=True)
+    source_key: Mapped[str | None] = mapped_column(String(255))
+    source: Mapped[str] = mapped_column(String(128), default="upload")
+    version_id: Mapped[str] = mapped_column(String(64), default="v1")
+    __table_args__ = (Index("ix_fact_lookup", "entity_type", "entity_key", "dataset", "field_name", "valid_from"),)
+
+
+class CanonicalRelation(Base):
+    __tablename__ = "canonical_relations"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    relation_type: Mapped[str] = mapped_column(String(64), index=True)
+    source_type: Mapped[str] = mapped_column(String(64), index=True)
+    source_key: Mapped[str] = mapped_column(String(128), index=True)
+    target_type: Mapped[str] = mapped_column(String(64), index=True)
+    target_key: Mapped[str] = mapped_column(String(128), index=True)
+    claim_id: Mapped[int | None] = mapped_column(ForeignKey("claims.id"), index=True)
+    directed: Mapped[bool] = mapped_column(Boolean, default=True)
+    weight: Mapped[Decimal] = mapped_column(Numeric(24, 6), default=1)
+    associated_amount: Mapped[Decimal] = mapped_column(Numeric(18, 2), default=0)
+    valid_from: Mapped[date | None] = mapped_column(Date, index=True)
+    valid_to: Mapped[date | None] = mapped_column(Date)
+    provenance: Mapped[str] = mapped_column(String(32), default="derived")
+    evidence_json: Mapped[str] = mapped_column(Text, default="{}")
+    __table_args__ = (Index("ix_relation_lookup", "relation_type", "source_key", "target_key", "valid_from"),)
+
+
+class RuleParameterDefinition(Base):
+    __tablename__ = "rule_parameter_definitions"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    rule_id: Mapped[str] = mapped_column(ForeignKey("rules.rule_id"), index=True)
+    parameter_key: Mapped[str] = mapped_column(String(128))
+    display_label: Mapped[str] = mapped_column(String(255))
+    description: Mapped[str] = mapped_column(Text)
+    parameter_type: Mapped[str] = mapped_column(String(32))
+    unit: Mapped[str | None] = mapped_column(String(32))
+    provenance_class: Mapped[str] = mapped_column(String(32), index=True)
+    edit_authority: Mapped[str] = mapped_column(String(32))
+    default_value_json: Mapped[str] = mapped_column(Text)
+    bounds_json: Mapped[str] = mapped_column(Text, default="{}")
+    scope: Mapped[str] = mapped_column(String(32), default="global")
+    required: Mapped[bool] = mapped_column(Boolean, default=True)
+    recommendation_eligible: Mapped[bool] = mapped_column(Boolean, default=False)
+    source: Mapped[str] = mapped_column(String(255))
+    rationale: Mapped[str] = mapped_column(Text)
+    version: Mapped[int] = mapped_column(Integer, default=1)
+    __table_args__ = (UniqueConstraint("rule_id", "parameter_key", "version", name="uq_rule_parameter_version"),)
+
+
+class ThresholdRecommendation(Base):
+    __tablename__ = "threshold_recommendations"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    rule_id: Mapped[str] = mapped_column(ForeignKey("rules.rule_id"), index=True)
+    parameter_key: Mapped[str] = mapped_column(String(128), index=True)
+    dataset_snapshot_hash: Mapped[str] = mapped_column(String(64), index=True)
+    method: Mapped[str] = mapped_column(String(64))
+    suggested_value_json: Mapped[str | None] = mapped_column(Text)
+    range_json: Mapped[str] = mapped_column(Text, default="{}")
+    population_json: Mapped[str] = mapped_column(Text, default="{}")
+    distribution_json: Mapped[str] = mapped_column(Text, default="{}")
+    impact_json: Mapped[str] = mapped_column(Text, default="{}")
+    support_level: Mapped[str] = mapped_column(String(16), index=True)
+    warnings_json: Mapped[str] = mapped_column(Text, default="[]")
+    feature_version: Mapped[str] = mapped_column(String(64))
+    code_version: Mapped[str] = mapped_column(String(64))
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+
+
+class ThresholdSimulation(Base):
+    __tablename__ = "threshold_simulations"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    rule_id: Mapped[str] = mapped_column(ForeignKey("rules.rule_id"), index=True)
+    proposed_configuration_json: Mapped[str] = mapped_column(Text)
+    dataset_snapshot_hash: Mapped[str] = mapped_column(String(64), index=True)
+    result_json: Mapped[str] = mapped_column(Text)
+    status: Mapped[str] = mapped_column(String(32), index=True)
+    created_by: Mapped[int | None] = mapped_column(ForeignKey("users.id"))
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow)
+
+
+class ProviderFeatureSnapshot(Base):
+    __tablename__ = "provider_feature_snapshots"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    provider_token: Mapped[str] = mapped_column(String(128), index=True)
+    period_start: Mapped[date] = mapped_column(Date, index=True)
+    period_end: Mapped[date] = mapped_column(Date, index=True)
+    feature_name: Mapped[str] = mapped_column(String(128), index=True)
+    observed_value: Mapped[Decimal] = mapped_column(Numeric(24, 6))
+    numerator: Mapped[Decimal | None] = mapped_column(Numeric(24, 6))
+    denominator: Mapped[Decimal | None] = mapped_column(Numeric(24, 6))
+    peer_group: Mapped[str] = mapped_column(String(255))
+    peer_level_used: Mapped[str] = mapped_column(String(64))
+    peer_size: Mapped[int] = mapped_column(Integer)
+    peer_median: Mapped[Decimal | None] = mapped_column(Numeric(24, 6))
+    percentile: Mapped[Decimal | None] = mapped_column(Numeric(8, 5))
+    interval_low: Mapped[Decimal | None] = mapped_column(Numeric(24, 6))
+    interval_high: Mapped[Decimal | None] = mapped_column(Numeric(24, 6))
+    support_level: Mapped[str] = mapped_column(String(16))
+    context_json: Mapped[str] = mapped_column(Text, default="{}")
+
+
+class ProviderRelationship(Base):
+    __tablename__ = "provider_relationships"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    network_id: Mapped[str] = mapped_column(String(128), index=True)
+    source_node_type: Mapped[str] = mapped_column(String(64))
+    source_node_key: Mapped[str] = mapped_column(String(128), index=True)
+    target_node_type: Mapped[str] = mapped_column(String(64))
+    target_node_key: Mapped[str] = mapped_column(String(128), index=True)
+    relationship_type: Mapped[str] = mapped_column(String(64), index=True)
+    directed: Mapped[bool] = mapped_column(Boolean, default=False)
+    claim_count: Mapped[int] = mapped_column(Integer, default=0)
+    member_count: Mapped[int] = mapped_column(Integer, default=0)
+    weight: Mapped[Decimal] = mapped_column(Numeric(24, 6), default=0)
+    associated_amount: Mapped[Decimal] = mapped_column(Numeric(18, 2), default=0)
+    unexpectedness: Mapped[Decimal | None] = mapped_column(Numeric(12, 6))
+    period_start: Mapped[date] = mapped_column(Date, index=True)
+    period_end: Mapped[date] = mapped_column(Date, index=True)
+    provenance: Mapped[str] = mapped_column(String(32), default="derived")
+    exclusion_json: Mapped[str] = mapped_column(Text, default="{}")
+    evidence_json: Mapped[str] = mapped_column(Text, default="{}")
+    __table_args__ = (UniqueConstraint("network_id", "source_node_key", "target_node_key", "relationship_type", "period_start", "period_end", name="uq_provider_relationship_snapshot"),)
+
+
+class RuleEvidenceReference(Base):
+    __tablename__ = "rule_evidence_references"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    rule_evaluation_id: Mapped[int] = mapped_column(ForeignKey("rule_evaluations.id", ondelete="CASCADE"), index=True)
+    dataset: Mapped[str] = mapped_column(String(64), index=True)
+    record_type: Mapped[str] = mapped_column(String(64))
+    record_id: Mapped[str] = mapped_column(String(128))
+    relationship: Mapped[str] = mapped_column(String(64))
+    display_json: Mapped[str] = mapped_column(Text, default="{}")

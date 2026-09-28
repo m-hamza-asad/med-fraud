@@ -19,6 +19,7 @@ qa/screenshots/*
 !qa/screenshots/.gitkeep
 playwright-report/
 test-results/
+.test-artifacts/
 *.tsbuildinfo
 apps/web/vite.config.js
 apps/web/vite.config.d.ts

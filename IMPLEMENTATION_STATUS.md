@@ -1,82 +1,40 @@
 # Implementation Status
 
-Last updated: 2026-09-15 (Asia/Karachi)
+Last updated: 2026-09-28 (Asia/Dubai)
 
 ## Release status
 
-**Not ready.** A working local foundation and demo UI now run, but the authoritative catalogue does not provide enough field-level policy to implement the required 149 real evaluators. No release gate is claimed as fully passed.
+**ENGINEERING_READY_ON_SYNTHETIC_DATA.** The deterministic engineering gates pass. No real tokenized dataset is present, so source mappings, payer policy references, calibration, linkage quality, structural breaks, and holdout acceptance remain `DATASET_PENDING`. This is not `DATASET_CALIBRATED_READY`.
 
-## Phases
+## Delivered
 
-| Gate | Scope | Status | Evidence / remaining work |
-|---|---|---|---|
-| 0 | Baseline, architecture, authentication, migrations, Shahai shell | Mostly complete | Local health, two users, token-based shell, setup/start/stop, tests and build verified. Formal migration revisions remain. |
-| 1 | Canonical data, imports, templates, validation | Partial | Three Excel templates, CSV pack, checksum, five-year and transactional flat-claim intake exist; complete canonical datasets/relationships remain. |
-| 2 | Registry, configuration, claim-level evaluation | Blocked on policy contracts | 164 registry and prospective configuration platform exist. Interim structured-fact adapter is not a substitute for 149 catalogue-semantic evaluators. |
-| 3 | Historical and provider analytics | Not started | Pending Gate 2. |
-| 4 | Network, pharmacy, policy, payment analytics | Not started | Pending Gate 3. |
-| 5 | All 149 evaluators, reporting, polish, release QA | Not started | Pending prior gates. |
+- Exact catalogue scope remains 164 total / 149 executable / 12 deferred document-text / 3 excluded model.
+- All 149 executable controls have canonical field-driven contracts, typed parameters/provenance, exclusions, disposition, evidence, missing-data behavior, and positive/negative/boundary/missing/exclusion tests.
+- Caller `signals.{rule_id}`, synthetic scores, and synthetic outcome labels are removed at intake and parse boundaries.
+- Import validation is a non-mutating preview followed by explicit transactional, idempotent commit into indexed canonical facts.
+- Recommendation, simulation, prospective Admin configuration, immutable run snapshots, readable claim evidence, provider peer/trend context, and React Flow network evidence are implemented.
+- CSV/Excel/PDF exports include decisions, coverage, rules, observed/expected summaries, exposure, network/provider keys, and configuration provenance. Network edges have a CSV export endpoint.
+- Versioned additive migrations preserve the existing database; a verified pre-remediation backup is retained locally.
 
-## Runtime baseline
+## Dataset gate
 
-- Windows / PowerShell workspace.
-- Node.js: `v24.18.0`.
-- npm: `11.16.0`.
-- Python is not on `PATH`.
-- Codex bundled Python: `C:\Users\Yoga 9\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe`, version `3.12.14`.
-- The bundled Python does not currently include FastAPI; a project virtual environment and locked dependencies are required.
-- The folder is not currently a Git repository.
-
-## Completed checks
-
-| Check | Command | Result |
-|---|---|---|
-| Workspace inventory | `Get-ChildItem -Force` | Four supplied planning/specification files present; no implementation scaffold found. |
-| Repository state | `git status --short --branch` | Not a Git repository; repository initialization is not treated as a blocker. |
-| Node runtime | `node --version; npm --version` | `v24.18.0`; `11.16.0`. |
-| Python runtime | bundled `python.exe --version` | `Python 3.12.14`. |
-| Required Python baseline | bundled `python.exe -c "import fastapi"` | Fails: `ModuleNotFoundError`; dependencies not installed yet. |
-
-## Current work
-
-- Obtain business-owned field-level contracts for the 149 executable controls.
-- Replace the disclosed structured-fact adapter with real family evaluators and full fixtures.
-- Complete canonical entities, reports, E2E, performance, screenshot/PDF evidence, and release QA.
-
-## Known failures / blockers
-
-- The catalogue omits rule-level population, input fields, reason/evidence contracts and resolved dispositions for all/most controls; only nine rules name `cfg.*` parameters. Implementing exact payment policy would require inventing materially consequential business rules.
-- Ten critical Playwright E2E workflows are not implemented or run.
-- Required full historical/peer/network computations and performance benchmark against persisted 10,000-line history are not implemented.
-
-## Exact commands used
-
-```powershell
-git status --short --branch
-node --version
-npm --version
-python --version
-py -0p
-& 'C:\Users\Yoga 9\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe' --version
-& 'C:\Users\Yoga 9\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe' -c "import fastapi"
-.\scripts\demo-reset.ps1
-.\scripts\start.ps1
-.\scripts\test.ps1
-.\scripts\backup.ps1 -Destination '.\data\backups\verification.sqlite3'
-.\scripts\stop.ps1
-.\scripts\restore.ps1 -Source '.\data\backups\verification.sqlite3'
-$env:PYTHONPATH = (Join-Path (Get-Location) 'apps\api'); .\.venv\Scripts\python.exe scripts\benchmark.py
-```
+Only `data/demo/claims_demo_synthetic.csv` was found. Aggregate-safe profiling reports 20,893 rows, 26 columns, date range 2023-01-01 through 2028-04-02, four outcome-like columns, `SYNTHETIC_FIXTURE_ONLY`, and `UNCONFIRMED` mapping. The future-dated range reinforces that this is not real calibration data. No row values were emitted.
 
 ## Latest verified results
 
-- Backend: **155 passed** in 2.24 seconds.
-- Frontend unit: **1 passed**.
-- TypeScript strict check: **passed, 0 errors**.
-- ESLint: **passed, 0 warnings/errors**.
-- Vite production build: **passed**, 1.52 seconds.
-- API health/startup: **ready**, SQLite ready, registry 149/12/3.
-- Browser console after inspected workflows: **0 errors/warnings**.
-- Visual inspection: sign-in, overview, claim detail, and rule registry at default/mobile and 1440×900; dark/light; fixed light-theme hero contrast and horizontal page overflow.
-- Backup/stop/restore/start integrity sequence: **passed**.
-- In-memory benchmark: 1,000-row validation 0.0046 s; 149,000 interim structured-contract evaluations 0.3333 s. This does not prove the required historical benchmark.
+| Gate | Result |
+|---|---|
+| Backend | 330 tests pass, including the 149-rule matrix, migrations, synthetic mapping, import atomicity, analytics, export reconciliation/provenance, multi-run manifests, time-correct readmission linkage, simulation parity, and ordered configuration versions. |
+| Frontend | Unit test, strict TypeScript, ESLint, and production build pass. |
+| Browser | 2 authenticated Playwright workflows pass; standard demo run has 149 rules and zero evaluator errors. |
+| Accessibility | Keyboard focus, labelled graph, table alternative, landmark, status-text, and mobile overflow checks pass. |
+| Visual | Desktop/mobile login and authenticated network graph snapshots pass. |
+| Security | Static production-source gate passes; dependency audit reports zero vulnerabilities; CSRF/RBAC, Argon2, formula safety, and security headers are active. |
+| Performance | 10,000-row validation 0.3130 s; 149,000 canonical evaluations 19.5225 s; 500-node/2,000-edge serialization 0.0093 s; CSV/XLSX/PDF generation each below 0.21 s; 11.21 MB measured Python peak. |
+| Migration/backup | Additive migration and integrity tests pass; verified pre-remediation backup passes schema/integrity check. |
+
+## Remaining real-data work
+
+Place a tokenized, contract-approved extract outside tracked demo fixtures, run `python scripts/profile_dataset.py <path>`, confirm source-to-canonical mappings and governed references with owners, then run time-correct recommendation stability, linkage, simulation reconciliation, and holdout acceptance. Do not use the synthetic outcome columns as performance evidence.
+
+The latest completed synthetic population run is #4. It processed 20,893 claims against 149 executable controls with zero evaluator errors under `canonical-evidence-v2-2026-09-28`. This is engineering evidence only and does not change the real-data readiness boundary.

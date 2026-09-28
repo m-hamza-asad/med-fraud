@@ -7,5 +7,5 @@
   ],
   "DEMO-CLEAN-001": [],
   "DEMO-PARTIAL-001": [],
-  "notes": "No excluded or deferred control is expected to trigger."
+  "notes": "Deterministic canonical facts only; unavailable controls must disable, never pass."
 }

@@ -4,8 +4,8 @@ Generated from the validated 164-control registry. The machine-readable matrix i
 
 | Scope | Count | Evaluated |
 |---|---:|---|
-| Structured executable | 149 | Structured-fact adapter; field-level policy unresolved |
+| Structured executable | 149 | Canonical field-driven contract |
 | Deferred document/text | 12 | No |
 | Excluded model | 3 | No |
 
-All controls are visible. Required fields, effective-date fixtures, and exclusion fixtures remain explicitly marked pending where the catalogue does not define them; they are not silently counted as implemented.
+All controls are visible. Every executable row names its primitive, required datasets and fields, positive/negative/boundary/missing/exclusion test matrix, UI location, disposition, and stable reason code. Missing inputs disable a control and never become a pass. Governed policy/reference values remain unavailable until supplied; they are not inferred from utilization.

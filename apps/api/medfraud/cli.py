@@ -8,12 +8,13 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from .auth import hash_password
-from .database import Base, engine
+from .database import engine
+from .migrations import run_migrations
 from .models import User
 
 
 def initialize(admin_password: str, analyst_password: str) -> None:
-    Base.metadata.create_all(engine)
+    run_migrations()
     with Session(engine) as db:
         for username, password, role in (("admin", admin_password, "admin"), ("analyst", analyst_password, "analyst")):
             user = db.scalar(select(User).where(User.username == username))

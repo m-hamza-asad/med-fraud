@@ -1,5 +1,5 @@
 export type User = { username: string; role: 'admin' | 'analyst' }
-export type Claim = { id: number; claim_id: string; member: string; provider: string; network_id?: string; claim_type: string; service_date: string; submitted_amount: string; net_amount: string; paid_amount: string; decision: 'Flagged' | 'No flag detected'; coverage: 'Complete' | 'Partial'; primary_reason: string; triggered_rules: number }
+export type Claim = { id: number; claim_id: string; member: string; provider: string; network_id?: string; claim_type: string; service_date: string; submitted_amount: string; net_amount: string; paid_amount: string; decision: 'Flagged' | 'No flag detected' | 'Not evaluated'; coverage: 'Complete' | 'Partial' | 'Not evaluated'; primary_reason: string; triggered_rules: number; evaluation_run_id?: number }
 
 let csrf = sessionStorage.getItem('csrf') ?? ''
 export function setCsrf(value: string) { csrf = value; sessionStorage.setItem('csrf', value) }
